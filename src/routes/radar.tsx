@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
 import { Radar, Flame, Telescope, Users, AlertTriangle } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,10 +48,6 @@ function RadarPage() {
     if (error) toast.error(error.message.includes("OWN_FLAG") ? "You can't judge your own discovery" : "Couldn't save your ruling");
     else { toast.success(ruling === "confirmed" ? "Confirmed — discoverer gets the bonus" : "Rejected"); void review.refetch(); }
   };
-  useEffect(() => {
-    const ch = supabase.channel(`radar-${crypto.randomUUID()}`).on("postgres_changes", { event: "INSERT", schema: "public", table: "swipes" }, () => { void stats.refetch(); void top.refetch(); void review.refetch(); }).subscribe();
-    return () => { void supabase.removeChannel(ch); };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const s = stats.data;
   const cards = [
     { k: "Sky patches inspected", v: s?.patches_inspected, i: Telescope },
