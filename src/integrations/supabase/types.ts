@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      patch_rulings: {
+        Row: {
+          created_at: string
+          patch_id: string
+          ruled_by: string
+          ruling: string
+        }
+        Insert: {
+          created_at?: string
+          patch_id: string
+          ruled_by: string
+          ruling: string
+        }
+        Update: {
+          created_at?: string
+          patch_id?: string
+          ruled_by?: string
+          ruling?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -97,6 +118,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           confirmed: number | null
+          correct_verifications: number | null
           display_name: string | null
           first_flags: number | null
           points: number | null
@@ -131,7 +153,11 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      claim_guest_swipes: { Args: { _session: string }; Returns: number }
+      rule_patch: {
+        Args: { _patch: string; _ruling: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
