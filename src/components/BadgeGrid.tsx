@@ -2,12 +2,12 @@ import { Lock } from "lucide-react";
 import { BADGES, isUnlocked, progress, type BadgeCtx } from "@/lib/badges";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-export function BadgeGrid({ ctx }: { ctx: BadgeCtx }) {
+export function BadgeGrid({ ctx, unlocked }: { ctx: BadgeCtx; unlocked?: string[] }) {
   return (
     <TooltipProvider delayDuration={100}>
       <ul className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {BADGES.map((b) => {
-          const on = isUnlocked(b, ctx); const p = progress(b, ctx);
+          const on = isUnlocked(b, ctx) || !!unlocked?.includes(b.id); const p = on ? b.goal : progress(b, ctx);
           return (
             <li key={b.id}>
               <Tooltip>

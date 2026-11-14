@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { TARGETS, targetForCoords, type Stats, type Kind } from "./sky";
 
 export type BadgeEvent = "diff" | "gaia" | "spectral" | "validator";
@@ -45,6 +46,23 @@ export function checkBadges() {
     for (const id of fresh) { const b = BADGES.find((x) => x.id === id)!; toast.success(`${b.emoji} Badge unlocked: ${b.name}`, { description: b.desc, className: "badge-toast" }); }
   }
   window.dispatchEvent(new Event("astroswipe:badges"));
+  void syncBadgesToAccount(now);
+}
+
+/** Save unlocked badges on the signed-in account so the public profile shows them. */
+export async function syncBadgesToAccount(ids: string[] = unlockedIds(readCtx())) {
+  if (!ids.length) return;
+  const { data } = await supabase.auth.getSession();
+  const uid = data.session?.user.id; if (!uid) return;
+  await supabase.from("user_badges").upsert(ids.map((badge_id) => ({ user_id: uid, badge_id })), { onConflict: "user_id,badge_id", ignoreDuplicates: true });
+}
+
+export interface PublicProfile { display_name: string; reviewed: number; flagged: number; days: string[]; badges: string[]; member_since: string }
+export async function fetchPublicProfile(id: string): Promise<PublicProfile | null> {
+  const { data, error } = await supabase.rpc("public_profile", { _id: id });
+  if (error) throw error;
+  const r = data?.[0]; if (!r) return null;
+  return { ...r, reviewed: Number(r.reviewed), flagged: Number(r.flagged) } as PublicProfile;
 }
 
 export function markEvent(e: BadgeEvent) {
