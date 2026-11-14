@@ -26,13 +26,17 @@ function useRadar() {
     const { data, error } = await supabase.from("candidate_patches").select("*").order("flaggers", { ascending: false }).order("flags", { ascending: false }).order("last_at", { ascending: false }).limit(50);
     if (error) throw error; return data ?? [];
   } });
-  return { stats, top };
+  const review = useQuery({ queryKey: ["radar", "verify"], refetchInterval: 15000, queryFn: async () => {
+    const { data, error } = await supabase.from("patch_verification").select("*").in("status", ["confirmed", "second_review"]).order("flagged_at", { ascending: false }).limit(50);
+    if (error) throw error; return data ?? [];
+  } });
+  return { stats, top, review };
 }
 
 function RadarPage() {
-  const { stats, top } = useRadar();
+  const { stats, top, review } = useRadar();
   useEffect(() => {
-    const ch = supabase.channel(`radar-${crypto.randomUUID()}`).on("postgres_changes", { event: "INSERT", schema: "public", table: "swipes" }, () => { void stats.refetch(); void top.refetch(); }).subscribe();
+    const ch = supabase.channel(`radar-${crypto.randomUUID()}`).on("postgres_changes", { event: "INSERT", schema: "public", table: "swipes" }, () => { void stats.refetch(); void top.refetch(); void review.refetch(); }).subscribe();
     return () => { void supabase.removeChannel(ch); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const s = stats.data;
@@ -51,6 +55,17 @@ function RadarPage() {
           <div key={k} className="rounded-2xl border border-border bg-card p-4"><I className="mb-2 h-4 w-4 text-accent" /><div className="font-display text-2xl font-bold">{v ?? "—"}</div><div className="text-[11px] text-muted-foreground">{k}</div></div>
         ))}
       </div>
+      {!!review.data?.length && (<>
+        <h2 className="mb-3 font-display text-lg font-semibold">Verified &amp; second review</h2>
+        <ul className="mb-6 space-y-2">{review.data.map((c) => {
+          const ok = c.status === "confirmed"; const n = (c.yes_votes ?? 0) + (c.no_votes ?? 0);
+          return (<li key={c.patch_id} className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card p-3 ${ok ? "border-success" : "border-info"}`}>
+            <div><div className="flex items-center gap-2 font-medium"><span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${ok ? "bg-success/15 text-success" : "bg-info/15 text-info"}`}>{ok ? "Confirmed by community" : "Second review"}</span>{c.constellation || "Unknown"}</div>
+            <div className="font-mono text-[11px] text-muted-foreground">{fmtRA(c.ra ?? 0)} {fmtDec(c.dec ?? 0)} · {Math.round((100 * (c.yes_votes ?? 0)) / Math.max(n, 1))}% agree of {n} verifiers</div></div>
+            <Link to="/inspect" search={{ ra: c.ra ?? 0, dec: c.dec ?? 0 }} className="rounded-full border border-primary px-4 py-1.5 text-xs font-semibold text-primary">Deep dive</Link>
+          </li>);
+        })}</ul>
+      </>)}
       <h2 className="mb-3 font-display text-lg font-semibold">Top candidates</h2>
       {top.isError && <p className="text-sm text-destructive">Couldn't load community data. Try again shortly.</p>}
       {top.data && top.data.length === 0 && <p className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">No anomalies flagged yet — <Link to="/" search={{}} className="text-primary underline">be the first</Link>.</p>}
