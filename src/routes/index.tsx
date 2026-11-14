@@ -7,7 +7,10 @@ import { SkyCanvas, type ViewOpts } from "@/components/SkyCanvas";
 import { SkyControls } from "@/components/SkyControls";
 import { TARGETS, EPOCHS, BANDS, fmtRA, fmtDec, parseQuery, targetForCoords, randomPatch, type Target, type Classification } from "@/lib/sky";
 import { useStats } from "@/lib/store";
-import { recordSwipe, seenSet, syncSeen, type SwipeResult } from "@/lib/swipes";
+import { recordSwipe, seenSet, syncSeen, fetchVerifyQueue, alreadyFlagged, type SwipeResult } from "@/lib/swipes";
+import { useUser } from "@/lib/auth";
+import { isVerifySlot, POINTS, VERIFY_VOTES_NEEDED } from "@/lib/points";
+import { ShieldCheck } from "lucide-react";
 import { patchKey } from "@/lib/sky";
 
 type S = { ra?: number | undefined; dec?: number | undefined; fov?: number | undefined };
@@ -38,6 +41,15 @@ function Feed() {
   const [deck, setDeck] = useState<Target[]>(base);
   const [endless, setEndless] = useState(true);
   const seen = useRef<Set<string>>(new Set());
+  const { user } = useUser();
+  // Flagged patches waiting for independent verification; mixed into up to 20% of the feed.
+  const queue = useRef<Target[]>([]);
+  const verifyKeys = useRef<Map<string, number>>(new Map());
+  const loadQueue = async () => {
+    const rows = await fetchVerifyQueue(seen.current, user?.id);
+    queue.current = rows.map((r) => { verifyKeys.current.set(r.patch_id!, (r.yes_votes ?? 0) + (r.no_votes ?? 0)); return targetForCoords(r.ra!, r.dec!); });
+  };
+  const fill = (pos: number) => { if (isVerifySlot(pos)) { while (queue.current.length) { const v = queue.current.shift()!; if (!seen.current.has(patchKey(v))) return v; } } return freshRandom(); };
   // Never serve a patch this volunteer already reviewed (except an explicitly linked one).
   const freshRandom = () => { for (let i = 0; i < 50; i++) { const p = randomPatch(); if (!seen.current.has(patchKey(p))) return p; } return randomPatch(); };
   const filterSeen = (d: Target[], keepFirst: boolean) => {
@@ -47,8 +59,8 @@ function Feed() {
   const linked = search.ra !== undefined && search.dec !== undefined;
   useEffect(() => {
     seen.current = seenSet(); setDeck(linked ? filterSeen(base, true) : Array.from({ length: 5 }, () => freshRandom())); setIdx(0); setEndless(!linked);
-    void syncSeen().then((s) => { seen.current = s; setDeck((d) => filterSeen(d, linked)); });
-  }, [base]); // eslint-disable-line react-hooks/exhaustive-deps
+    void syncSeen().then(async (s) => { seen.current = s; await loadQueue(); setDeck((d) => (linked ? filterSeen(d, true) : d.map((x, i) => (isVerifySlot(i) ? fill(i) : x)))); });
+  }, [base, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const [idx, setIdx] = useState(0);
   const [opts, setOpts] = useState<ViewOpts>({ diff: false, gaia: false, band: "composite", fov: search.fov ?? 1, speed: 1 });
   const [q, setQ] = useState("");
@@ -61,17 +73,22 @@ function Feed() {
     setDeck((d) => {
       const rest = d.slice(idx + 1).filter((x) => !seen.current.has(patchKey(x)));
       const head = d.slice(0, idx + 1);
-      return rest.length < 2 ? [...head, ...rest, freshRandom(), freshRandom(), freshRandom()] : [...head, ...rest];
+      const out = [...head, ...rest];
+      while (out.length < idx + 4) out.push(endless ? fill(out.length) : freshRandom());
+      return out;
     });
     setIdx((i) => i + 1); setDrag({ x: 0, y: 0, active: false });
+    if (queue.current.length < 3) void loadQueue();
   };
+  const isVerify = verifyKeys.current.has(patchKey(t));
+  const award = (pts: number, why: string) => { if (user) toast.success(`+${pts} points`, { description: why }); };
   const report = (r: SwipeResult) => {
     if (r === "duplicate") toast("You've already reviewed this patch", { description: "Each volunteer gets one vote per patch." });
     else if (r === "rate_limited") toast.error("Slow down a little", { description: "Too many reviews in a short time — try again in a minute." });
     else if (r === "error") toast.error("Couldn't save that review");
     return r === "ok";
   };
-  const pass = async () => { const r = await recordSwipe(t, "static"); if (r === "rate_limited") { report(r); return; } if (report(r)) { review(); toast("Static sky logged", { description: t.name }); } next(); };
+  const pass = async () => { const r = await recordSwipe(t, "static"); if (r === "rate_limited") { report(r); return; } if (report(r)) { review(); if (user) award(isVerify ? POINTS.review + POINTS.verify : POINTS.review, isVerify ? "Verification vote counted" : t.name); else toast("Static sky logged", { description: t.name }); } next(); };
   const skip = async () => { const r = await recordSwipe(t, "skipped"); if (r === "rate_limited") { report(r); return; } report(r); next(); };
   const randomNow = () => { const rp = freshRandom(); setDeck((d) => [...d.slice(0, idx + 1), rp, ...d.slice(idx + 1)]); setIdx((i) => i + 1); };
   const toggleEndless = () => {
@@ -81,11 +98,16 @@ function Feed() {
   };
   const inspect = () => nav({ to: "/inspect", search: { ra: t.ra, dec: t.dec, fov: opts.fov } });
   const flag = async (cls: Classification) => {
+    const first = !isVerify && !(await alreadyFlagged(patchKey(t)));
     const r = await recordSwipe(t, "candidate", cls);
     if (r === "rate_limited") { report(r); return; }
     if (!report(r)) { next(); return; }
     review({ id: `${t.id}-${Date.now()}`, targetId: t.id, name: t.name, ra: t.ra, dec: t.dec, cls, at: Date.now() });
-    toast.success("Flagged: something changed", { description: `${t.name} · added to your Discovery Log` }); next();
+    if (!user) toast.success("Flagged: something changed", { description: "Sign in with Google to earn points for your discoveries" });
+    else if (isVerify) award(POINTS.review + POINTS.verify, "Verification vote counted");
+    else if (first) award(POINTS.review + POINTS.firstFlag, `First to spot this! +${POINTS.confirmedBonus} more if ${VERIFY_VOTES_NEEDED} volunteers confirm it`);
+    else award(POINTS.review, "Someone flagged this first — your vote still helps");
+    next();
   };
   const load = (x: Target) => { const i = deck.findIndex((d) => d.id === x.id); if (i >= 0) setIdx(i); else nav({ to: "/", search: { ra: x.ra, dec: x.dec } }); };
   const doSearch = (e: React.FormEvent) => { e.preventDefault(); const r = parseQuery(q); if (!r) { toast.error("Try a name or “RA Dec”, e.g. 08h55m10.8s -07d14m42.5s"); return; } setIdx(0); nav({ to: "/", search: { ra: r.ra, dec: r.dec, fov: opts.fov } }); };
@@ -123,6 +145,7 @@ function Feed() {
               onPointerUp={up} onPointerCancel={() => setDrag({ x: 0, y: 0, active: false })}
             >
               <div className="relative">
+                {isVerify && <div className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-full border border-info bg-background/80 px-2.5 py-1 text-[11px] font-semibold text-info"><ShieldCheck className="h-3.5 w-3.5" />Verify a flag · {verifyKeys.current.get(patchKey(t))}/{VERIFY_VOTES_NEEDED} votes</div>}
                 <SkyCanvas target={t} opts={opts} className="aspect-square w-full" />
                 {hint && <div className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl border-4 px-4 py-1 font-display text-3xl font-black ${hint === "FLAG" ? "border-success text-success" : hint === "STATIC" ? "border-destructive text-destructive" : "border-info text-info"}`}>{hint}</div>}
               </div>
