@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Orbit, BookMarked, Users, Telescope, Radar, Trophy } from "lucide-react";
+import { Orbit, BookMarked, Users, Telescope, Radar, Trophy, Atom } from "lucide-react";
 import { AuthButton } from "./AuthButton";
 import type { ReactNode } from "react";
 import { Guide } from "./Guide";
@@ -15,12 +15,13 @@ export function Shell({ children }: { children: ReactNode }) {
       </header>
       <main className="mx-auto max-w-5xl px-4 py-4">{children}</main>
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border/60 bg-background/90 backdrop-blur">
-        <div className="mx-auto flex max-w-md justify-around py-2">
+        <div className="mx-auto flex max-w-lg justify-around py-2">
           <Link to="/" className={l} activeOptions={{ exact: true }}><Telescope className="h-5 w-5" />Swipe</Link>
           <Link to="/log" className={l}><BookMarked className="h-5 w-5" />My log</Link>
           <Link to="/radar" className={l}><Radar className="h-5 w-5" />Radar</Link>
           <Link to="/leaderboard" className={l}><Trophy className="h-5 w-5" />Ranks</Link>
           <Link to="/community" className={l}><Users className="h-5 w-5" />Community</Link>
+          <Link to="/science" className={l}><Atom className="h-5 w-5" />Science</Link>
         </div>
       </nav>
     </div>
