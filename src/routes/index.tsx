@@ -7,7 +7,8 @@ import { SkyCanvas, type ViewOpts } from "@/components/SkyCanvas";
 import { SkyControls } from "@/components/SkyControls";
 import { TARGETS, CLASSES, EPOCHS, BANDS, fmtRA, fmtDec, parseQuery, targetForCoords, randomPatch, type Target, type Classification } from "@/lib/sky";
 import { useStats } from "@/lib/store";
-import { recordSwipe } from "@/lib/swipes";
+import { recordSwipe, seenSet, syncSeen, type SwipeResult } from "@/lib/swipes";
+import { patchKey } from "@/lib/sky";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type S = { ra?: number | undefined; dec?: number | undefined; fov?: number | undefined };
@@ -37,7 +38,18 @@ function Feed() {
   }, [search.ra, search.dec]);
   const [deck, setDeck] = useState<Target[]>(base);
   const [endless, setEndless] = useState(false);
-  useEffect(() => { setDeck(base); setIdx(0); }, [base]);
+  const seen = useRef<Set<string>>(new Set());
+  // Never serve a patch this volunteer already reviewed (except an explicitly linked one).
+  const freshRandom = () => { for (let i = 0; i < 50; i++) { const p = randomPatch(); if (!seen.current.has(patchKey(p))) return p; } return randomPatch(); };
+  const filterSeen = (d: Target[], keepFirst: boolean) => {
+    const out = d.filter((x, i) => (keepFirst && i === 0) || !seen.current.has(patchKey(x)));
+    return out.length ? out : [freshRandom(), freshRandom()];
+  };
+  const linked = search.ra !== undefined && search.dec !== undefined;
+  useEffect(() => {
+    seen.current = seenSet(); setDeck(filterSeen(base, linked)); setIdx(0);
+    void syncSeen().then((s) => { seen.current = s; setDeck((d) => filterSeen(d, linked)); });
+  }, [base]); // eslint-disable-line react-hooks/exhaustive-deps
   const [idx, setIdx] = useState(0);
   const [opts, setOpts] = useState<ViewOpts>({ diff: false, gaia: false, band: "composite", fov: search.fov ?? 1, speed: 1 });
   const [classify, setClassify] = useState(false);
@@ -47,20 +59,33 @@ function Feed() {
   const t = deck[Math.min(idx, deck.length - 1)]!;
 
   const next = () => {
-    setDeck((d) => (idx + 2 >= d.length ? [...d, randomPatch(), randomPatch(), randomPatch()] : d));
+    seen.current.add(patchKey(t));
+    setDeck((d) => {
+      const rest = d.slice(idx + 1).filter((x) => !seen.current.has(patchKey(x)));
+      const head = d.slice(0, idx + 1);
+      return rest.length < 2 ? [...head, ...rest, freshRandom(), freshRandom(), freshRandom()] : [...head, ...rest];
+    });
     setIdx((i) => i + 1); setDrag({ x: 0, y: 0, active: false });
   };
-  const pass = () => { review(); void recordSwipe(t, "static"); toast("Static sky logged", { description: t.name }); next(); };
-  const skip = () => { void recordSwipe(t, "skipped"); next(); };
-  const randomNow = () => { const rp = randomPatch(); setDeck((d) => [...d.slice(0, idx + 1), rp, ...d.slice(idx + 1)]); setIdx((i) => i + 1); };
+  const report = (r: SwipeResult) => {
+    if (r === "duplicate") toast("You've already reviewed this patch", { description: "Each volunteer gets one vote per patch." });
+    else if (r === "rate_limited") toast.error("Slow down a little", { description: "Too many reviews in a short time — try again in a minute." });
+    else if (r === "error") toast.error("Couldn't save that review");
+    return r === "ok";
+  };
+  const pass = async () => { const r = await recordSwipe(t, "static"); if (r === "rate_limited") { report(r); return; } if (report(r)) { review(); toast("Static sky logged", { description: t.name }); } next(); };
+  const skip = async () => { const r = await recordSwipe(t, "skipped"); if (r === "rate_limited") { report(r); return; } report(r); next(); };
+  const randomNow = () => { const rp = freshRandom(); setDeck((d) => [...d.slice(0, idx + 1), rp, ...d.slice(idx + 1)]); setIdx((i) => i + 1); };
   const toggleEndless = () => {
-    if (endless) { setEndless(false); setDeck(base); setIdx(0); return; }
-    setEndless(true); setDeck(Array.from({ length: 5 }, () => randomPatch())); setIdx(0);
+    if (endless) { setEndless(false); setDeck(filterSeen(base, false)); setIdx(0); return; }
+    setEndless(true); setDeck(Array.from({ length: 5 }, () => freshRandom())); setIdx(0);
     toast("Endless Survey Mode", { description: "Random patches from across the whole sky." });
   };
   const inspect = () => nav({ to: "/inspect", search: { ra: t.ra, dec: t.dec, fov: opts.fov } });
-  const flag = (cls: Classification) => {
-    void recordSwipe(t, "candidate", cls);
+  const flag = async (cls: Classification) => {
+    const r = await recordSwipe(t, "candidate", cls);
+    if (r === "rate_limited") { setClassify(false); report(r); return; }
+    if (!report(r)) { setClassify(false); next(); return; }
     review({ id: `${t.id}-${Date.now()}`, targetId: t.id, name: t.name, ra: t.ra, dec: t.dec, cls, at: Date.now() });
     setClassify(false); toast.success("Added to your Discovery Log", { description: `${cls} · ${t.name}` }); next();
   };
