@@ -22,6 +22,13 @@
       "when": 1794689220874,
       "tag": "0002_swipe_rate_limits_and_dedupe",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794690539469,
+      "tag": "0003_gamification_and_verification",
+      "breakpoints": true
     }
   ]
 }

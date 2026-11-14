@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Orbit, BookMarked, Users, Telescope, Radar } from "lucide-react";
+import { Orbit, BookMarked, Users, Telescope, Radar, Trophy } from "lucide-react";
+import { AuthButton } from "./AuthButton";
 import type { ReactNode } from "react";
 import { Guide } from "./Guide";
 export function Shell({ children }: { children: ReactNode }) {
@@ -9,7 +10,7 @@ export function Shell({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <Link to="/" className="flex items-center gap-2 font-display text-lg font-bold tracking-tight"><Orbit className="h-5 w-5 text-primary" />Astro<span className="text-glow text-primary">swipe</span></Link>
-          <div className="flex items-center gap-3"><span className="hidden font-mono text-[10px] uppercase tracking-widest text-muted-foreground sm:block">SPHEREx · Planet X Hunt</span><Guide /></div>
+          <div className="flex items-center gap-3"><span className="hidden font-mono text-[10px] uppercase tracking-widest text-muted-foreground sm:block">SPHEREx · Planet X Hunt</span><Guide /><AuthButton /></div>
         </div>
       </header>
       <main className="mx-auto max-w-5xl px-4 py-4">{children}</main>
@@ -18,6 +19,7 @@ export function Shell({ children }: { children: ReactNode }) {
           <Link to="/" className={l} activeOptions={{ exact: true }}><Telescope className="h-5 w-5" />Swipe</Link>
           <Link to="/log" className={l}><BookMarked className="h-5 w-5" />My log</Link>
           <Link to="/radar" className={l}><Radar className="h-5 w-5" />Radar</Link>
+          <Link to="/leaderboard" className={l}><Trophy className="h-5 w-5" />Ranks</Link>
           <Link to="/community" className={l}><Users className="h-5 w-5" />Community</Link>
         </div>
       </nav>

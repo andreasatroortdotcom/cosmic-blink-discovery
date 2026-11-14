@@ -35,3 +35,15 @@ export async function recordSwipe(t: Target, verdict: "candidate" | "static" | "
   if (error.message.includes("RATE_LIMIT")) return "rate_limited";
   console.error("swipe not saved", error); return "error";
 }
+
+/** Flagged patches still collecting verification votes, oldest first, excluding ones this volunteer already saw. */
+export async function fetchVerifyQueue(seen: Set<string>, userId?: string) {
+  const { data } = await supabase.from("patch_verification").select("patch_id, ra, dec, discoverer_id, yes_votes, no_votes")
+    .eq("status", "pending").order("flagged_at", { ascending: true }).limit(200);
+  return (data ?? []).filter((r) => r.patch_id && !seen.has(r.patch_id) && (!userId || r.discoverer_id !== userId));
+}
+/** Has anyone flagged this patch before? Used to tell a volunteer they were first. */
+export async function alreadyFlagged(patchId: string) {
+  const { data } = await supabase.from("patch_verification").select("patch_id").eq("patch_id", patchId).maybeSingle();
+  return !!data;
+}

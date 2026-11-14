@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string
+          id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string
+          id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+        }
+        Relationships: []
+      }
       swipes: {
         Row: {
           candidate_type: string | null
@@ -24,6 +45,7 @@ export type Database = {
           ip_hash: string | null
           patch_id: string
           ra: number
+          user_id: string | null
           user_session_id: string
           verdict: string
         }
@@ -36,6 +58,7 @@ export type Database = {
           ip_hash?: string | null
           patch_id: string
           ra: number
+          user_id?: string | null
           user_session_id: string
           verdict: string
         }
@@ -48,6 +71,7 @@ export type Database = {
           ip_hash?: string | null
           patch_id?: string
           ra?: number
+          user_id?: string | null
           user_session_id?: string
           verdict?: string
         }
@@ -66,6 +90,33 @@ export type Database = {
           ra: number | null
           static_votes: number | null
           top_type: string | null
+        }
+        Relationships: []
+      }
+      leaderboard: {
+        Row: {
+          avatar_url: string | null
+          confirmed: number | null
+          display_name: string | null
+          first_flags: number | null
+          points: number | null
+          reviews: number | null
+          user_id: string | null
+          verifications: number | null
+        }
+        Relationships: []
+      }
+      patch_verification: {
+        Row: {
+          constellation: string | null
+          dec: number | null
+          discoverer_id: string | null
+          flagged_at: string | null
+          no_votes: number | null
+          patch_id: string | null
+          ra: number | null
+          status: string | null
+          yes_votes: number | null
         }
         Relationships: []
       }
