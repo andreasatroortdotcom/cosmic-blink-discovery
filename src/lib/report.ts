@@ -17,7 +17,7 @@ export function buildReport(i: ReportInput) {
   const total = i.flags + i.staticVotes;
   return {
     title: "NASA Citizen Science Candidate Report",
-    designation: `ASW J${fmtRA(i.ra).replace(/[hms]/g, "").slice(0, 9)}${fmtDec(i.dec).replace(/[°′″]/g, "").replace("−", "-").slice(0, 8)}`,
+    designation: `ASW J${fmtRA(i.ra).replace(/[hms]/g, "").slice(0, 9)}${fmtDec(i.dec).replace(/[°′″]/g, "").replace("−", "-").slice(0, 7)}`,
     patchId: i.patchId,
     coordinates: { raSexagesimal: fmtRA(i.ra), raDeg: +i.ra.toFixed(5), decSexagesimal: fmtDec(i.dec), decDeg: +i.dec.toFixed(5), constellation: i.constellation || t.constellation, fovArcmin: +(fov * 6).toFixed(1) },
     consensus: {
