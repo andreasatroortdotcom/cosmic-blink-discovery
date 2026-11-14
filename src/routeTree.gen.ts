@@ -15,6 +15,7 @@ import { Route as InspectRouteImport } from './routes/inspect'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as LogRouteImport } from './routes/log'
 import { Route as RadarRouteImport } from './routes/radar'
+import { Route as ScienceRouteImport } from './routes/science'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,6 +47,11 @@ const RadarRoute = RadarRouteImport.update({
   path: '/radar',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ScienceRoute = ScienceRouteImport.update({
+  id: '/science',
+  path: '/science',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/leaderboard': typeof LeaderboardRoute
   '/log': typeof LogRoute
   '/radar': typeof RadarRoute
+  '/science': typeof ScienceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByTo {
   '/leaderboard': typeof LeaderboardRoute
   '/log': typeof LogRoute
   '/radar': typeof RadarRoute
+  '/science': typeof ScienceRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,13 +79,27 @@ export interface FileRoutesById {
   '/leaderboard': typeof LeaderboardRoute
   '/log': typeof LogRoute
   '/radar': typeof RadarRoute
+  '/science': typeof ScienceRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/community' | '/inspect' | '/leaderboard' | '/log' | '/radar'
+    | '/'
+    | '/community'
+    | '/inspect'
+    | '/leaderboard'
+    | '/log'
+    | '/radar'
+    | '/science'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/community' | '/inspect' | '/leaderboard' | '/log' | '/radar'
+  to:
+    | '/'
+    | '/community'
+    | '/inspect'
+    | '/leaderboard'
+    | '/log'
+    | '/radar'
+    | '/science'
   id:
     | '__root__'
     | '/'
@@ -86,6 +108,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/log'
     | '/radar'
+    | '/science'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -95,6 +118,7 @@ export interface RootRouteChildren {
   LeaderboardRoute: typeof LeaderboardRoute
   LogRoute: typeof LogRoute
   RadarRoute: typeof RadarRoute
+  ScienceRoute: typeof ScienceRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -141,6 +165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RadarRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/science': {
+      id: '/science'
+      path: '/science'
+      fullPath: '/science'
+      preLoaderRoute: typeof ScienceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -151,6 +182,7 @@ const rootRouteChildren: RootRouteChildren = {
   LeaderboardRoute: LeaderboardRoute,
   LogRoute: LogRoute,
   RadarRoute: RadarRoute,
+  ScienceRoute: ScienceRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
