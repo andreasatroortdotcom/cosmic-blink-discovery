@@ -16,7 +16,7 @@ export function AuthButton() {
   const { user, ready } = useUser();
   if (!ready) return <span className="h-8 w-8" />;
   if (!user) return <GoogleButton label="Sign in" />;
-  const pic = user.user_metadata?.avatar_url as string | undefined;
+  const pic = user.user_metadata?.['avatar_url'] as string | undefined;
   return (
     <Link to="/leaderboard" aria-label="My profile" className="grid h-8 w-8 place-items-center overflow-hidden rounded-full border border-primary/60 bg-primary/15 text-xs font-bold text-primary">
       {pic ? <img src={pic} alt="" className="h-full w-full object-cover" referrerPolicy="no-referrer" /> : (user.email?.[0] ?? "V").toUpperCase()}

@@ -36,7 +36,7 @@ function Board() {
         ) : (
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-3">
-              <div><div className="font-display text-lg font-semibold">{me?.display_name ?? user.user_metadata?.full_name ?? "You"}</div><div className="text-sm text-accent">{titleFor(pts)}</div></div>
+              <div><div className="font-display text-lg font-semibold">{me?.display_name ?? user.user_metadata?.['full_name'] ?? "You"}</div><div className="text-sm text-accent">{titleFor(pts)}</div></div>
               <div className="text-right"><div className="font-display text-3xl font-bold text-primary">{pts}</div><div className="text-[11px] text-muted-foreground">points</div></div>
             </div>
             <div className="grid grid-cols-4 gap-2 text-center font-mono text-xs">
