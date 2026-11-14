@@ -167,3 +167,5 @@
 body { font-family: var(--font-sans); background-image: radial-gradient(ellipse at top, color-mix(in oklab, var(--primary) 18%, transparent), transparent 60%); background-attachment: fixed; }
 @utility text-glow { text-shadow: 0 0 18px color-mix(in oklab, var(--primary) 70%, transparent); }
 @utility no-scrollbar { scrollbar-width: none; &::-webkit-scrollbar { display: none; } }
+
+.google-btn { background: #131314; border-color: #8e918f; color: #e3e3e3; font-family: "Google Sans", ui-sans-serif, system-ui, sans-serif; line-height: 20px; font-size: 14px; }
