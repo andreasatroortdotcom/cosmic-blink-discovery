@@ -116,6 +116,24 @@ export type Database = {
         }
         Relationships: []
       }
+      user_badges: {
+        Row: {
+          badge_id: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       candidate_patches: {
@@ -174,6 +192,17 @@ export type Database = {
       claim_guest_swipes: {
         Args: { _secret: string; _session: string }
         Returns: number
+      }
+      public_profile: {
+        Args: { _id: string }
+        Returns: {
+          badges: string[]
+          days: string[]
+          display_name: string
+          flagged: number
+          member_since: string
+          reviewed: number
+        }[]
       }
       register_guest_session: {
         Args: { _secret: string; _session: string }
