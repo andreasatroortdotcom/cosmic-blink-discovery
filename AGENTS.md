@@ -31,3 +31,4 @@ use the editor.
 
 - Community swipes are stored anonymously (per-browser session id, no login) with public read/insert, per the challenge brief; aggregates come from database views, not client-side math.
 - Random sky patches are derived deterministically from rounded RA/Dec so any shared coordinate link rebuilds the identical patch.
+- Swipe abuse limits (one vote per session per patch, per-session/per-network rate caps, per-network flag cap per patch) are enforced by a database trigger and unique constraint, never only in the client.
