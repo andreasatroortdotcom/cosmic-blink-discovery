@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { tick, resonance } from "@/lib/audio";
 import { buildField, bandFlux, BAND_UM, EPOCHS, type BandId, type Target } from "@/lib/sky";
 
 export interface ViewOpts { diff: boolean; gaia: boolean; band: BandId; fov: number; speed: number; playing?: boolean }
@@ -9,11 +10,13 @@ function tint(band: BandId, temp: number) {
   return [80 + 175 * (r / m), 80 + 175 * (g / m), 80 + 175 * (b / m)];
 }
 
-export function SkyCanvas({ target, opts, onEpoch, className }: { target: Target; opts: ViewOpts; onEpoch?: (i: number) => void; className?: string }) {
+export function SkyCanvas({ target, opts, onEpoch, className, bare }: { target: Target; opts: ViewOpts; onEpoch?: (i: number) => void; className?: string; bare?: boolean }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const field = useMemo(() => buildField(target), [target]);
   const epoch = useRef(0);
   const [ep, setEp] = useState(0);
+  const prevDiff = useRef(opts.diff);
+  useEffect(() => { if (prevDiff.current !== opts.diff) resonance(opts.diff); prevDiff.current = opts.diff; }, [opts.diff]);
 
   useEffect(() => {
     const c = ref.current!; const ctx = c.getContext("2d")!;
@@ -60,10 +63,12 @@ export function SkyCanvas({ target, opts, onEpoch, className }: { target: Target
     };
     draw();
     if (opts.playing === false) return;
-    const id = setInterval(() => { epoch.current = (epoch.current + 1) % EPOCHS.length; if (opts.diff && epoch.current === 0) epoch.current = 1; draw(); }, 900 / opts.speed);
+    const id = setInterval(() => { epoch.current = (epoch.current + 1) % EPOCHS.length; if (opts.diff && epoch.current === 0) epoch.current = 1; draw(); tick(); }, 900 / opts.speed);
     return () => clearInterval(id);
   }, [field, opts, onEpoch]);
 
+  const canvas = <canvas ref={ref} width={640} height={640} className={className} aria-label={`SPHEREx blink comparator of ${target.name}`} />;
+  if (bare) return canvas;
   return (
     <>
       <canvas ref={ref} width={640} height={640} className={className} aria-label={`SPHEREx blink comparator of ${target.name}`} />

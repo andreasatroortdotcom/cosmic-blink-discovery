@@ -12,6 +12,9 @@ import { useUser } from "@/lib/auth";
 import { isVerifySlot, POINTS, VERIFY_VOTES_NEEDED } from "@/lib/points";
 import { ShieldCheck } from "lucide-react";
 import { patchKey } from "@/lib/sky";
+import { chime } from "@/lib/audio";
+import { setTourStep, useTourStep } from "@/lib/tour";
+import { ReportDialog } from "@/components/ReportDialog";
 
 type S = { ra?: number | undefined; dec?: number | undefined; fov?: number | undefined };
 export const Route = createFileRoute("/")({
@@ -67,6 +70,16 @@ function Feed() {
   const [drag, setDrag] = useState({ x: 0, y: 0, active: false });
   const start = useRef({ x: 0, y: 0 });
   const t = deck[Math.min(idx, deck.length - 1)]!;
+  // Judge tour: drive the real card through WISE 0855 → difference → Gaia → simulated flag + report.
+  const tour = useTourStep();
+  const wise = TARGETS.find((x) => x.id === "wise0855")!;
+  useEffect(() => {
+    if (tour === null) return;
+    if (tour === 0) { if (search.ra !== wise.ra || search.dec !== wise.dec) void nav({ to: "/", search: { ra: wise.ra, dec: wise.dec } }); setIdx(0); setOpts((o) => ({ ...o, diff: false, gaia: false, band: "composite", speed: 1 })); }
+    if (tour === 1) setOpts((o) => ({ ...o, diff: true, gaia: false }));
+    if (tour === 2) setOpts((o) => ({ ...o, diff: false, gaia: true }));
+    if (tour === 3) { chime(); toast.success("Simulated flag: something changed", { description: "Demo only — no vote was recorded." }); }
+  }, [tour]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const next = () => {
     seen.current.add(patchKey(t));
@@ -102,6 +115,7 @@ function Feed() {
     const r = await recordSwipe(t, "candidate", cls);
     if (r === "rate_limited") { report(r); return; }
     if (!report(r)) { next(); return; }
+    chime();
     review({ id: `${t.id}-${Date.now()}`, targetId: t.id, name: t.name, ra: t.ra, dec: t.dec, cls, at: Date.now() });
     if (!user) toast.success("Flagged: something changed", { description: "Sign in with Google to earn points for your discoveries" });
     else if (isVerify) award(POINTS.review + POINTS.verify, "Verification vote counted");
@@ -117,24 +131,24 @@ function Feed() {
 
   return (
     <Shell>
-      <form onSubmit={doSearch} className="mb-3 flex gap-2">
+      <form onSubmit={doSearch} className="mb-2 flex gap-2 sm:mb-3">
         <div className="relative flex-1"><Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Barnard's Star · 133.795 -7.245 · 08h55m10.8s -07d14m42.5s" className="h-10 w-full rounded-full border border-border bg-card pl-9 pr-3 font-mono text-xs outline-none focus:border-primary" /></div>
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Barnard's Star · 133.795 -7.245 · 08h55m10.8s -07d14m42.5s" className="h-9 w-full rounded-full sm:h-10 border border-border bg-card pl-9 pr-3 font-mono text-xs outline-none focus:border-primary" /></div>
         <button className="rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground">Go</button>
       </form>
-      <div className="mb-3 flex flex-wrap gap-2">
-        <button onClick={randomNow} className="inline-flex items-center gap-1.5 rounded-full border border-primary/60 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary"><Shuffle className="h-3.5 w-3.5" />Generate random sky patch</button>
-        <button onClick={toggleEndless} aria-pressed={endless} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold ${endless ? "border-accent bg-accent/15 text-accent" : "border-border text-muted-foreground"}`}><InfinityIcon className="h-3.5 w-3.5" />Endless Survey Mode{endless ? " · on" : ""}</button>
+      <div className="mb-2 flex flex-nowrap gap-2 sm:mb-3">
+        <button onClick={randomNow} className="inline-flex items-center gap-1.5 rounded-full border border-primary/60 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary"><Shuffle className="h-3.5 w-3.5" /><span className="sm:hidden">Random patch</span><span className="hidden sm:inline">Generate random sky patch</span></button>
+        <button onClick={toggleEndless} aria-pressed={endless} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold ${endless ? "border-accent bg-accent/15 text-accent" : "border-border text-muted-foreground"}`}><InfinityIcon className="h-3.5 w-3.5" />Endless<span className="hidden sm:inline"> Survey Mode</span>{endless ? " · on" : ""}</button>
       </div>
-      <div className="no-scrollbar -mx-4 mb-4 flex gap-2 overflow-x-auto px-4">
+      <div className="no-scrollbar -mx-3 mb-2 flex gap-2 overflow-x-auto px-3 sm:-mx-4 sm:mb-4 sm:px-4">
         <span className="flex shrink-0 items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-accent"><Sparkles className="h-3 w-3" />NASA targets</span>
         {TARGETS.filter((x) => x.benchmark).map((x) => (
           <button key={x.id} onClick={() => load(x)} className={`shrink-0 rounded-full border px-3 py-1 text-xs ${t.id === x.id ? "border-accent bg-accent/15 text-accent" : "border-border text-muted-foreground"}`}>{x.name}</button>
         ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,460px)_1fr]">
-        <div className="mx-auto w-full max-w-[460px]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,460px)_1fr]">
+        <div className="mx-auto w-full min-w-0 max-w-[460px]">
           <div className="relative">
             <div className="absolute inset-x-4 top-3 h-full rounded-3xl border border-border bg-card/40" />
             <article
@@ -146,16 +160,16 @@ function Feed() {
             >
               <div className="relative">
                 {isVerify && <div className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-full border border-info bg-background/80 px-2.5 py-1 text-[11px] font-semibold text-info"><ShieldCheck className="h-3.5 w-3.5" />Verify a flag · {verifyKeys.current.get(patchKey(t))}/{VERIFY_VOTES_NEEDED} votes</div>}
-                <SkyCanvas target={t} opts={opts} className="aspect-square w-full" />
+                <SkyCanvas target={t} opts={opts} className="mx-auto block aspect-square w-full max-w-[36dvh] sm:max-w-none" />
                 {hint && <div className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl border-4 px-4 py-1 font-display text-3xl font-black ${hint === "FLAG" ? "border-success text-success" : hint === "STATIC" ? "border-destructive text-destructive" : "border-info text-info"}`}>{hint}</div>}
               </div>
-              <div className="space-y-3 p-4">
+              <div className="flex flex-col justify-between space-y-2 p-3 sm:space-y-3 sm:p-4">
                 <div className="flex items-start justify-between gap-2">
-                  <div><h1 className="font-display text-xl font-bold">{t.name}</h1><p className="text-xs text-muted-foreground">{t.constellation}</p></div>
+                  <div><h1 className="truncate font-display text-lg font-bold sm:text-xl">{t.name}</h1><p className="text-xs text-muted-foreground">{t.constellation}</p></div>
                   <div className="text-right font-mono text-[11px] leading-5"><div>RA {fmtRA(t.ra)}</div><div>Dec {fmtDec(t.dec)}</div></div>
                 </div>
-                <p className="text-sm text-muted-foreground">{t.blurb}</p>
-                <div className="flex flex-wrap gap-1.5 font-mono text-[10px] text-muted-foreground">
+                <p className="hidden text-sm text-muted-foreground sm:block">{t.blurb}</p>
+                <div className="hidden flex-wrap gap-1.5 font-mono text-[10px] text-muted-foreground sm:flex">
                   <span className="rounded bg-secondary px-1.5 py-0.5">{EPOCHS[0]} → {EPOCHS[EPOCHS.length - 1]}</span>
                   <span className="rounded bg-secondary px-1.5 py-0.5">{BANDS.find((b) => b.id === opts.band)!.range}</span>
                   <span className="rounded bg-secondary px-1.5 py-0.5">102 bands · 6.2″/px</span>
@@ -164,13 +178,13 @@ function Feed() {
               </div>
             </article>
           </div>
-          <div className="mt-5 flex items-center justify-center gap-6">
-            <button aria-label="Static sky" onClick={pass} className="grid h-16 w-16 place-items-center rounded-full border-2 border-destructive text-destructive transition active:scale-90"><X className="h-8 w-8" /></button>
-            <button aria-label="Deep dive" onClick={inspect} className="grid h-12 w-12 place-items-center rounded-full border-2 border-info text-info transition active:scale-90"><Star className="h-6 w-6" /></button>
-            <button aria-label="Flag anomaly" onClick={() => void flag("Unknown anomaly")} className="grid h-16 w-16 place-items-center rounded-full border-2 border-success text-success transition active:scale-90"><Globe className="h-8 w-8" /></button>
+          <div className="mt-3 flex items-center justify-center gap-5 sm:mt-5 sm:gap-6">
+            <button aria-label="Static sky" onClick={pass} className="grid h-14 w-14 shrink-0 place-items-center rounded-full border-2 border-destructive sm:h-16 sm:w-16 text-destructive transition active:scale-90"><X className="h-8 w-8" /></button>
+            <button aria-label="Deep dive" onClick={inspect} className="grid h-12 w-12 shrink-0 place-items-center rounded-full border-2 border-info text-info transition active:scale-90"><Star className="h-6 w-6" /></button>
+            <button aria-label="Flag anomaly" onClick={() => void flag("Unknown anomaly")} className="grid h-14 w-14 shrink-0 place-items-center rounded-full border-2 border-success sm:h-16 sm:w-16 text-success transition active:scale-90"><Globe className="h-8 w-8" /></button>
           </div>
-          <p className="mt-2 text-center text-[11px] text-muted-foreground">← static · ↑ inspect · something changes →</p>
-          <div className="mt-1 text-center"><button onClick={skip} className="inline-flex items-center gap-1 text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"><SkipForward className="h-3 w-3" />Not sure — skip</button></div>
+          <p className="mt-2 hidden text-center text-[11px] text-muted-foreground sm:block">← static · ↑ inspect · something changes →</p>
+          <div className="mt-1 text-center sm:mt-1"><button onClick={skip} className="inline-flex items-center gap-1 text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"><SkipForward className="h-3 w-3" />Not sure — skip</button></div>
         </div>
         <aside className="hidden space-y-4 lg:block">
           <div className="rounded-2xl border border-border bg-card p-5">
@@ -188,7 +202,8 @@ function Feed() {
           </div>
         </aside>
       </div>
-
+      <ReportDialog hideTrigger open={tour === 3} onOpenChange={(o) => { if (!o) setTourStep(null); }}
+        input={{ patchId: patchKey(wise), ra: wise.ra, dec: wise.dec, constellation: wise.constellation, ...(wise.fov !== undefined ? { fov: wise.fov } : {}), flags: 1, flaggers: 1, staticVotes: 0, classification: "Something changed — brown dwarf benchmark (tour demo)" }} />
     </Shell>
   );
 }

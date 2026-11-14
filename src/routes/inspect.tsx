@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ArrowLeft, Copy, Download } from "lucide-react";
+import { ArrowLeft, Copy, Download, AudioLines } from "lucide-react";
+import { CrossMatch } from "@/components/CrossMatch";
+import { sonify } from "@/lib/audio";
+import { useMuted } from "@/lib/audio";
 import { toast } from "sonner";
 import { Shell } from "@/components/Shell";
 import { SkyCanvas, type ViewOpts } from "@/components/SkyCanvas";
@@ -28,6 +31,13 @@ function Inspect() {
   const url = typeof window === "undefined" ? "" : `${window.location.origin}/inspect?ra=${ra}&dec=${dec}&fov=${opts.fov}`;
   const main = buildField(t).find((s) => s.anomaly || s.var || Math.abs(s.vx) > 0.01);
   const pm = main ? (Math.hypot(main.vx, main.vy) * 6 * 60 * 2).toFixed(2) : "0";
+  const muted = useMuted();
+  const [playing, setPlaying] = useState(false);
+  const play = () => {
+    const secs = sonify(sed.points.map((p) => p.f));
+    if (!secs) { toast(muted ? "Sound is muted" : "Audio unavailable", { description: muted ? "Turn sound on with the speaker icon in the header." : "Your browser blocked audio." }); return; }
+    setPlaying(true); setTimeout(() => setPlaying(false), secs * 1000);
+  };
   const W = 600, H = 220;
   const path = sed.points.map((p, i) => `${i ? "L" : "M"}${((Math.log(p.w / 0.75) / Math.log(5 / 0.75)) * W).toFixed(1)},${(H - p.f * (H - 20)).toFixed(1)}`).join(" ");
 
@@ -52,7 +62,9 @@ function Inspect() {
             ))}
           </dl>
           <div className="rounded-2xl border border-border bg-card p-4">
-            <h2 className="mb-2 font-display text-sm font-semibold">102-band SPHEREx spectrum (SED)</h2>
+            <div className="mb-2 flex items-center justify-between gap-2"><h2 className="font-display text-sm font-semibold">102-band SPHEREx spectrum (SED)</h2>
+              <button onClick={play} disabled={playing} className="inline-flex items-center gap-1.5 rounded-full border border-accent px-3 py-1 text-[11px] font-semibold text-accent disabled:opacity-60"><AudioLines className="h-3.5 w-3.5" />{playing ? "Playing…" : "Play spectral sonification"}</button></div>
+            <p className="mb-2 text-[10px] text-muted-foreground">5-second sweep from 0.75 to 5.0 µm — higher pitch means brighter infrared flux.</p>
             <svg viewBox={`0 0 ${W} ${H + 20}`} className="w-full">
               <defs><linearGradient id="sg" x1="0" x2="1"><stop offset="0" stopColor="var(--info)" /><stop offset="1" stopColor="var(--accent)" /></linearGradient></defs>
               {[0.75, 1, 2, 3, 4, 5].map((w) => { const x = (Math.log(w / 0.75) / Math.log(5 / 0.75)) * W; return <g key={w}><line x1={x} x2={x} y1={0} y2={H} stroke="var(--border)" /><text x={Math.min(x + 2, W - 30)} y={H + 14} fontSize="11" fill="var(--muted-foreground)" fontFamily="JetBrains Mono">{w}µm</text></g>; })}
@@ -67,6 +79,7 @@ function Inspect() {
           <p className="break-all font-mono text-[10px] text-muted-foreground">?ra={ra}&dec={dec}&fov={opts.fov}</p>
         </div>
       </div>
+      <div className="mt-6"><CrossMatch target={t} opts={opts} /></div>
     </Shell>
   );
 }
