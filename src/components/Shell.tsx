@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Orbit, BookMarked, Users, Telescope } from "lucide-react";
+import { Orbit, BookMarked, Users, Telescope, Radar } from "lucide-react";
 import type { ReactNode } from "react";
 import { Guide } from "./Guide";
 export function Shell({ children }: { children: ReactNode }) {
@@ -17,6 +17,7 @@ export function Shell({ children }: { children: ReactNode }) {
         <div className="mx-auto flex max-w-md justify-around py-2">
           <Link to="/" className={l} activeOptions={{ exact: true }}><Telescope className="h-5 w-5" />Swipe</Link>
           <Link to="/log" className={l}><BookMarked className="h-5 w-5" />My log</Link>
+          <Link to="/radar" className={l}><Radar className="h-5 w-5" />Radar</Link>
           <Link to="/community" className={l}><Users className="h-5 w-5" />Community</Link>
         </div>
       </nav>

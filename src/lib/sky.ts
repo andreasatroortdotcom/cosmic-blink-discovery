@@ -98,13 +98,35 @@ export function parseQuery(q: string): { ra: number; dec: number; target?: Targe
   if (!isFinite(ra) || !isFinite(dec) || ra < 0 || ra >= 360 || Math.abs(dec) > 90) return null;
   return { ra, dec };
 }
+const CONST: [string, number, number][] = [
+  ["Andromeda",10,38],["Aquarius",334,-11],["Aquila",297,3],["Ara",262,-55],["Aries",42,21],["Auriga",88,42],["Boötes",219,31],["Cancer",130,20],["Canis Major",104,-22],["Capricornus",315,-18],["Carina",130,-62],["Cassiopeia",15,62],["Centaurus",200,-47],["Cepheus",330,71],["Cetus",25,-7],["Columba",88,-35],["Corona Australis",283,-41],["Corvus",186,-18],["Crux",187,-60],["Cygnus",310,44],["Dorado",80,-60],["Draco",255,66],["Eridanus",58,-28],["Gemini",112,23],["Grus",337,-46],["Hercules",255,28],["Hydra",150,-14],["Hydrus",35,-70],["Indus",318,-59],["Leo",160,14],["Lepus",84,-19],["Libra",229,-15],["Lupus",230,-43],["Lyra",283,37],["Monoceros",107,1],["Octans",320,-82],["Ophiuchus",258,-6],["Orion",84,6],["Pavo",290,-66],["Pegasus",340,19],["Perseus",48,45],["Phoenix",15,-48],["Pisces",8,13],["Piscis Austrinus",340,-30],["Puppis",117,-31],["Sagittarius",285,-29],["Scorpius",253,-32],["Sculptor",2,-33],["Scutum",280,-10],["Serpens",255,0],["Taurus",65,16],["Triangulum Australe",240,-65],["Tucana",355,-65],["Ursa Major",160,56],["Ursa Minor",225,78],["Vela",140,-47],["Virgo",200,-3],["Volans",120,-70],["Camelopardalis",90,70],["Lynx",120,47],["Canes Venatici",195,40],["Coma Berenices",190,23],["Fornax",42,-32],["Horologium",45,-52],["Reticulum",60,-60],["Mensa",80,-77],["Chamaeleon",160,-79],["Apus",245,-75],["Telescopium",285,-51],["Microscopium",315,-36],["Delphinus",308,12],["Sagitta",295,18],["Vulpecula",300,25],["Lacerta",337,46],["Sextans",153,-3],["Crater",170,-15],["Antlia",150,-32],["Pyxis",132,-27],["Caelum",72,-38],["Pictor",85,-53],["Norma",242,-52],["Circinus",225,-63],["Musca",190,-70],["Equuleus",318,8],["Canis Minor",114,6],["Leo Minor",155,33],["Corona Borealis",238,33],["Triangulum",31,32],
+];
+export function constellationAt(ra: number, dec: number) {
+  const r = Math.PI / 180; let best = "Unknown", bd = 9;
+  for (const [n, a, d] of CONST) {
+    const c = Math.sin(dec * r) * Math.sin(d * r) + Math.cos(dec * r) * Math.cos(d * r) * Math.cos((ra - a) * r);
+    const dist = Math.acos(Math.max(-1, Math.min(1, c))); if (dist < bd) { bd = dist; best = n; }
+  }
+  return best;
+}
+export function patchId(ra: number, dec: number) { return `p${ra.toFixed(3)}_${dec.toFixed(3)}`; }
 export function targetForCoords(ra: number, dec: number): Target {
   const near = TARGETS.find((t) => Math.abs(t.ra - ra) < 0.05 && Math.abs(t.dec - dec) < 0.05);
   if (near) return near;
-  const kinds: Kind[] = ["static", "static", "asteroid", "variable", "brown-dwarf", "static"];
+  ra = Number(ra.toFixed(3)); dec = Number(dec.toFixed(3));
   const r = mulberry(seedOf(`${ra.toFixed(3)},${dec.toFixed(3)}`));
-  return { id: `c${ra.toFixed(3)}_${dec.toFixed(3)}`, name: `Custom field ${fmtRA(ra).slice(0, 6)}`, constellation: "Custom", ra, dec, kind: kinds[Math.floor(r() * kinds.length)] ?? "static", blurb: "User-requested coordinates." };
+  const x = r();
+  // mostly empty sky, with an occasional subtle mover or variable to discover
+  const kind: Kind = x < 0.62 ? "static" : x < 0.77 ? "asteroid" : x < 0.88 ? "variable" : x < 0.96 ? "brown-dwarf" : "planet-x";
+  const constellation = constellationAt(ra, dec);
+  return { id: patchId(ra, dec), name: `Patch ${fmtRA(ra).slice(0, 6)} ${fmtDec(dec).slice(0, 4)}`, constellation, ra, dec, kind, fov: 0.7 + r() * 0.6, blurb: "Random all-sky survey patch — look carefully, most fields are quiet." };
 }
+/** Uniform random point on the celestial sphere. rand must be called at runtime (not module scope). */
+export function randomPatch(rand: () => number = Math.random): Target {
+  const ra = rand() * 360; const dec = (Math.asin(2 * rand() - 1) * 180) / Math.PI;
+  return targetForCoords(Math.min(ra, 359.999), dec);
+}
+export function patchKey(t: Target) { return t.benchmark || !t.id.startsWith("p") ? t.id : patchId(t.ra, t.dec); }
 
 // ---- gamification ----
 export type Classification = "Brown Dwarf candidate" | "Asteroid/Comet" | "Planet X candidate" | "Variable Star" | "Unknown anomaly";

@@ -9,3 +9,13 @@ describe("sky", () => {
   it("ranks Stellar Scout after 5 reviews", () => { expect(rankFor({ reviewed: 5, flags: [], days: [] })).toBe("Stellar Scout"); });
   it("counts consecutive-day streak", () => { expect(streak(["2026-11-12", "2026-11-13", "2026-11-14"], "2026-11-14")).toBe(3); });
 });
+import { randomPatch, targetForCoords, mulberry } from "@/lib/sky";
+describe("random patches", () => {
+  it("stay within RA 0–360 and Dec ±90", () => {
+    const r = mulberry(42);
+    for (let i = 0; i < 500; i++) { const t = randomPatch(r); expect(t.ra).toBeGreaterThanOrEqual(0); expect(t.ra).toBeLessThan(360); expect(Math.abs(t.dec)).toBeLessThanOrEqual(90); }
+  });
+  it("rebuild the same patch from its coordinates (for Inspect & vote links)", () => {
+    const t = randomPatch(mulberry(7)); expect(targetForCoords(t.ra, t.dec).id).toBe(t.id);
+  });
+});
