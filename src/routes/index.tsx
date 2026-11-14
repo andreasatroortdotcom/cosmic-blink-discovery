@@ -131,6 +131,7 @@ function Feed() {
 
   return (
     <Shell>
+      <h1 className="sr-only">Astroswipe — hunt moving objects and variable stars in SPHEREx sky patches</h1>
       <form onSubmit={doSearch} className="mb-2 flex gap-2 sm:mb-3">
         <div className="relative flex-1"><Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Barnard's Star · 133.795 -7.245 · 08h55m10.8s -07d14m42.5s" className="h-9 w-full rounded-full sm:h-10 border border-border bg-card pl-9 pr-3 font-mono text-xs outline-none focus:border-primary" /></div>
@@ -165,7 +166,7 @@ function Feed() {
               </div>
               <div className="flex flex-col justify-between space-y-2 p-3 sm:space-y-3 sm:p-4">
                 <div className="flex items-start justify-between gap-2">
-                  <div><h1 className="truncate font-display text-lg font-bold sm:text-xl">{t.name}</h1><p className="text-xs text-muted-foreground">{t.constellation}</p></div>
+                  <div><h2 className="truncate font-display text-lg font-bold sm:text-xl">{t.name}</h2><p className="text-xs text-muted-foreground">{t.constellation}</p></div>
                   <div className="text-right font-mono text-[11px] leading-5"><div>RA {fmtRA(t.ra)}</div><div>Dec {fmtDec(t.dec)}</div></div>
                 </div>
                 <p className="hidden text-sm text-muted-foreground sm:block">{t.blurb}</p>
