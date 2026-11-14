@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { buildField, bandFlux, BAND_UM, EPOCHS, type BandId, type Target } from "@/lib/sky";
 
 export interface ViewOpts { diff: boolean; gaia: boolean; band: BandId; fov: number; speed: number; playing?: boolean }
@@ -13,6 +13,7 @@ export function SkyCanvas({ target, opts, onEpoch, className }: { target: Target
   const ref = useRef<HTMLCanvasElement>(null);
   const field = useMemo(() => buildField(target), [target]);
   const epoch = useRef(0);
+  const [ep, setEp] = useState(0);
 
   useEffect(() => {
     const c = ref.current!; const ctx = c.getContext("2d")!;
@@ -54,8 +55,7 @@ export function SkyCanvas({ target, opts, onEpoch, className }: { target: Target
         }
         for (const s of field) if (s.anomaly && !s.known) { const [x, y] = P(s.x + s.vx * e, s.y + s.vy * e); ctx.strokeStyle = "rgba(255,90,180,0.95)"; ctx.setLineDash([4, 3]); ctx.strokeRect(x - 14, y - 14, 28, 28); ctx.setLineDash([]); }
       }
-      ctx.fillStyle = "rgba(255,255,255,0.75)"; ctx.font = `${S / 28}px JetBrains Mono, monospace`;
-      ctx.fillText(`EPOCH ${e + 1}/${EPOCHS.length} · ${EPOCHS[e]}${opts.diff ? " − " + EPOCHS[0] : ""}`, S * 0.04, S * 0.07);
+      setEp(e);
       onEpoch?.(e);
     };
     draw();
@@ -64,5 +64,13 @@ export function SkyCanvas({ target, opts, onEpoch, className }: { target: Target
     return () => clearInterval(id);
   }, [field, opts, onEpoch]);
 
-  return <canvas ref={ref} width={640} height={640} className={className} aria-label={`SPHEREx blink comparator of ${target.name}`} />;
+  return (
+    <>
+      <canvas ref={ref} width={640} height={640} className={className} aria-label={`SPHEREx blink comparator of ${target.name}`} />
+      <div className="flex items-center justify-between gap-2 border-t border-border bg-card px-3 py-1.5 font-mono text-[11px] text-muted-foreground">
+        <span>EPOCH {ep + 1}/{EPOCHS.length} · {EPOCHS[ep]}{opts.diff ? ` − ${EPOCHS[0]}` : ""}</span>
+        <span className="flex gap-1">{EPOCHS.map((_, i) => <span key={i} className={`h-1.5 w-4 rounded-full ${i === ep ? "bg-primary" : "bg-secondary"}`} />)}</span>
+      </div>
+    </>
+  );
 }
