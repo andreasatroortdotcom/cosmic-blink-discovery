@@ -203,7 +203,7 @@ function Feed() {
         </aside>
       </div>
       <ReportDialog hideTrigger open={tour === 3} onOpenChange={(o) => { if (!o) setTourStep(null); }}
-        input={{ patchId: patchKey(wise), ra: wise.ra, dec: wise.dec, constellation: wise.constellation, fov: wise.fov, flags: 1, flaggers: 1, staticVotes: 0, classification: "Something changed — brown dwarf benchmark (tour demo)" }} />
+        input={{ patchId: patchKey(wise), ra: wise.ra, dec: wise.dec, constellation: wise.constellation, ...(wise.fov !== undefined ? { fov: wise.fov } : {}), flags: 1, flaggers: 1, staticVotes: 0, classification: "Something changed — brown dwarf benchmark (tour demo)" }} />
     </Shell>
   );
 }
