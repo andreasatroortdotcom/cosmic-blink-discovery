@@ -21,6 +21,7 @@ export type Database = {
           created_at: string
           dec: number
           id: string
+          ip_hash: string | null
           patch_id: string
           ra: number
           user_session_id: string
@@ -32,6 +33,7 @@ export type Database = {
           created_at?: string
           dec: number
           id?: string
+          ip_hash?: string | null
           patch_id: string
           ra: number
           user_session_id: string
@@ -43,6 +45,7 @@ export type Database = {
           created_at?: string
           dec?: number
           id?: string
+          ip_hash?: string | null
           patch_id?: string
           ra?: number
           user_session_id?: string

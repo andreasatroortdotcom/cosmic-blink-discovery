@@ -15,6 +15,13 @@
       "when": 1794688688297,
       "tag": "0001_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794689220874,
+      "tag": "0002_swipe_rate_limits_and_dedupe",
+      "breakpoints": true
     }
   ]
 }
