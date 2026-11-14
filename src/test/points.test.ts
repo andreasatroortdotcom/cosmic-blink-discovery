@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { verificationStatus, isVerifySlot, pointsFor } from "@/lib/points";
+import { verificationStatus, isVerifySlot, pointsFor, canMakeFinalCall } from "@/lib/points";
 
 describe("verification", () => {
   it("stays pending below 10 votes", () => expect(verificationStatus(9, 0)).toBe("pending"));
@@ -15,4 +15,9 @@ describe("feed mix", () => {
 describe("points", () => {
   it("first flag confirmed = 1 + 10 + 100", () => expect(pointsFor({ reviews: 1, verifications: 0, firstFlags: 1, confirmed: 1 })).toBe(111));
   it("verification vote = 1 + 5", () => expect(pointsFor({ reviews: 1, verifications: 1, firstFlags: 0, confirmed: 0 })).toBe(6));
+});
+describe("bonus and final call", () => {
+  it("correct verification earns +5 more", () => expect(pointsFor({ reviews: 1, verifications: 1, firstFlags: 0, confirmed: 0, correct: 1 })).toBe(11));
+  it("Brown Dwarf Hunter (800) can make final call", () => expect(canMakeFinalCall(800)).toBe(true));
+  it("Comet Chaser (799) cannot", () => expect(canMakeFinalCall(799)).toBe(false));
 });
