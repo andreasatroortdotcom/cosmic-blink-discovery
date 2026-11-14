@@ -119,7 +119,7 @@ export function targetForCoords(ra: number, dec: number): Target {
   // mostly empty sky, with an occasional subtle mover or variable to discover
   const kind: Kind = x < 0.62 ? "static" : x < 0.77 ? "asteroid" : x < 0.88 ? "variable" : x < 0.96 ? "brown-dwarf" : "planet-x";
   const constellation = constellationAt(ra, dec);
-  return { id: patchId(ra, dec), name: `Patch ${fmtRA(ra).slice(0, 6)} ${fmtDec(dec).slice(0, 4)}°`, constellation, ra, dec, kind, fov: 0.7 + r() * 0.6, blurb: "Random all-sky survey patch — look carefully, most fields are quiet." };
+  return { id: patchId(ra, dec), name: `Patch ${fmtRA(ra).slice(0, 6)} ${fmtDec(dec).slice(0, 4)}`, constellation, ra, dec, kind, fov: 0.7 + r() * 0.6, blurb: "Random all-sky survey patch — look carefully, most fields are quiet." };
 }
 /** Uniform random point on the celestial sphere. rand must be called at runtime (not module scope). */
 export function randomPatch(rand: () => number = Math.random): Target {
