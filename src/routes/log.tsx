@@ -45,7 +45,7 @@ function Log() {
           {stats.flags.map((f) => (
             <li key={f.id} className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-3">
               <Link to="/inspect" search={{ ra: f.ra, dec: f.dec }} className="min-w-0 flex-1">
-                <div className="font-medium">{f.name} <span className="ml-1 rounded bg-primary/15 px-1.5 py-0.5 text-[10px] text-primary">{f.cls}</span></div>
+                <div className="font-medium">{f.name} <span className="ml-1 rounded bg-primary/15 px-1.5 py-0.5 text-[10px] text-primary">{f.cls === "Unknown anomaly" ? "Something changed" : f.cls}</span></div>
                 <div className="font-mono text-[11px] text-muted-foreground">{fmtRA(f.ra)} {fmtDec(f.dec)} · {new Date(f.at).toLocaleString()}</div>
               </Link>
               <button aria-label="Remove" onClick={() => removeFlag(f.id)} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
