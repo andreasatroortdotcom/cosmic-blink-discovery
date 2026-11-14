@@ -5,11 +5,10 @@ import { toast } from "sonner";
 import { Shell } from "@/components/Shell";
 import { SkyCanvas, type ViewOpts } from "@/components/SkyCanvas";
 import { SkyControls } from "@/components/SkyControls";
-import { TARGETS, CLASSES, EPOCHS, BANDS, fmtRA, fmtDec, parseQuery, targetForCoords, randomPatch, type Target, type Classification } from "@/lib/sky";
+import { TARGETS, EPOCHS, BANDS, fmtRA, fmtDec, parseQuery, targetForCoords, randomPatch, type Target, type Classification } from "@/lib/sky";
 import { useStats } from "@/lib/store";
 import { recordSwipe, seenSet, syncSeen, type SwipeResult } from "@/lib/swipes";
 import { patchKey } from "@/lib/sky";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type S = { ra?: number | undefined; dec?: number | undefined; fov?: number | undefined };
 export const Route = createFileRoute("/")({
@@ -52,7 +51,6 @@ function Feed() {
   }, [base]); // eslint-disable-line react-hooks/exhaustive-deps
   const [idx, setIdx] = useState(0);
   const [opts, setOpts] = useState<ViewOpts>({ diff: false, gaia: false, band: "composite", fov: search.fov ?? 1, speed: 1 });
-  const [classify, setClassify] = useState(false);
   const [q, setQ] = useState("");
   const [drag, setDrag] = useState({ x: 0, y: 0, active: false });
   const start = useRef({ x: 0, y: 0 });
@@ -84,15 +82,15 @@ function Feed() {
   const inspect = () => nav({ to: "/inspect", search: { ra: t.ra, dec: t.dec, fov: opts.fov } });
   const flag = async (cls: Classification) => {
     const r = await recordSwipe(t, "candidate", cls);
-    if (r === "rate_limited") { setClassify(false); report(r); return; }
-    if (!report(r)) { setClassify(false); next(); return; }
+    if (r === "rate_limited") { report(r); return; }
+    if (!report(r)) { next(); return; }
     review({ id: `${t.id}-${Date.now()}`, targetId: t.id, name: t.name, ra: t.ra, dec: t.dec, cls, at: Date.now() });
-    setClassify(false); toast.success("Added to your Discovery Log", { description: `${cls} · ${t.name}` }); next();
+    toast.success("Flagged: something changed", { description: `${t.name} · added to your Discovery Log` }); next();
   };
   const load = (x: Target) => { const i = deck.findIndex((d) => d.id === x.id); if (i >= 0) setIdx(i); else nav({ to: "/", search: { ra: x.ra, dec: x.dec } }); };
   const doSearch = (e: React.FormEvent) => { e.preventDefault(); const r = parseQuery(q); if (!r) { toast.error("Try a name or “RA Dec”, e.g. 08h55m10.8s -07d14m42.5s"); return; } setIdx(0); nav({ to: "/", search: { ra: r.ra, dec: r.dec, fov: opts.fov } }); };
 
-  const up = () => { const { x, y } = drag; if (x > 110) { setDrag({ ...drag, active: false }); setClassify(true); } else if (x < -110) pass(); else if (y < -110) inspect(); else setDrag({ x: 0, y: 0, active: false }); };
+  const up = () => { const { x, y } = drag; if (x > 110) { setDrag({ ...drag, active: false }); void flag("Unknown anomaly"); } else if (x < -110) pass(); else if (y < -110) inspect(); else setDrag({ x: 0, y: 0, active: false }); };
   const hint = drag.x > 40 ? "FLAG" : drag.x < -40 ? "STATIC" : drag.y < -40 ? "INSPECT" : null;
 
   return (
@@ -146,9 +144,9 @@ function Feed() {
           <div className="mt-5 flex items-center justify-center gap-6">
             <button aria-label="Static sky" onClick={pass} className="grid h-16 w-16 place-items-center rounded-full border-2 border-destructive text-destructive transition active:scale-90"><X className="h-8 w-8" /></button>
             <button aria-label="Deep dive" onClick={inspect} className="grid h-12 w-12 place-items-center rounded-full border-2 border-info text-info transition active:scale-90"><Star className="h-6 w-6" /></button>
-            <button aria-label="Flag anomaly" onClick={() => setClassify(true)} className="grid h-16 w-16 place-items-center rounded-full border-2 border-success text-success transition active:scale-90"><Globe className="h-8 w-8" /></button>
+            <button aria-label="Flag anomaly" onClick={() => void flag("Unknown anomaly")} className="grid h-16 w-16 place-items-center rounded-full border-2 border-success text-success transition active:scale-90"><Globe className="h-8 w-8" /></button>
           </div>
-          <p className="mt-2 text-center text-[11px] text-muted-foreground">← static · ↑ inspect · flag moving object →</p>
+          <p className="mt-2 text-center text-[11px] text-muted-foreground">← static · ↑ inspect · something changes →</p>
           <div className="mt-1 text-center"><button onClick={skip} className="inline-flex items-center gap-1 text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"><SkipForward className="h-3 w-3" />Not sure — skip</button></div>
         </div>
         <aside className="hidden space-y-4 lg:block">
@@ -168,14 +166,6 @@ function Feed() {
         </aside>
       </div>
 
-      <Dialog open={classify} onOpenChange={setClassify}>
-        <DialogContent>
-          <DialogHeader><DialogTitle className="font-display">What did you spot?</DialogTitle></DialogHeader>
-          <div className="grid gap-2">
-            {CLASSES.map((c) => <button key={c} onClick={() => flag(c)} className="rounded-xl border border-border bg-secondary/50 px-4 py-3 text-left text-sm font-medium hover:border-primary hover:bg-primary/10">{c}</button>)}
-          </div>
-        </DialogContent>
-      </Dialog>
     </Shell>
   );
 }
