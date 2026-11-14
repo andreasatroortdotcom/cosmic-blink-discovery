@@ -133,12 +133,12 @@ function Feed() {
     <Shell>
       <form onSubmit={doSearch} className="mb-2 flex gap-2 sm:mb-3">
         <div className="relative flex-1"><Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Barnard's Star · 133.795 -7.245 · 08h55m10.8s -07d14m42.5s" className="h-10 w-full rounded-full border border-border bg-card pl-9 pr-3 font-mono text-xs outline-none focus:border-primary" /></div>
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Barnard's Star · 133.795 -7.245 · 08h55m10.8s -07d14m42.5s" className="h-9 w-full rounded-full sm:h-10 border border-border bg-card pl-9 pr-3 font-mono text-xs outline-none focus:border-primary" /></div>
         <button className="rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground">Go</button>
       </form>
-      <div className="mb-2 flex flex-wrap gap-2 sm:mb-3">
-        <button onClick={randomNow} className="inline-flex items-center gap-1.5 rounded-full border border-primary/60 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary"><Shuffle className="h-3.5 w-3.5" />Generate random sky patch</button>
-        <button onClick={toggleEndless} aria-pressed={endless} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold ${endless ? "border-accent bg-accent/15 text-accent" : "border-border text-muted-foreground"}`}><InfinityIcon className="h-3.5 w-3.5" />Endless Survey Mode{endless ? " · on" : ""}</button>
+      <div className="mb-2 flex flex-nowrap gap-2 sm:mb-3">
+        <button onClick={randomNow} className="inline-flex items-center gap-1.5 rounded-full border border-primary/60 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary"><Shuffle className="h-3.5 w-3.5" /><span className="sm:hidden">Random patch</span><span className="hidden sm:inline">Generate random sky patch</span></button>
+        <button onClick={toggleEndless} aria-pressed={endless} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold ${endless ? "border-accent bg-accent/15 text-accent" : "border-border text-muted-foreground"}`}><InfinityIcon className="h-3.5 w-3.5" />Endless<span className="hidden sm:inline"> Survey Mode</span>{endless ? " · on" : ""}</button>
       </div>
       <div className="no-scrollbar -mx-3 mb-2 flex gap-2 overflow-x-auto px-3 sm:-mx-4 sm:mb-4 sm:px-4">
         <span className="flex shrink-0 items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-accent"><Sparkles className="h-3 w-3" />NASA targets</span>
@@ -160,7 +160,7 @@ function Feed() {
             >
               <div className="relative">
                 {isVerify && <div className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-full border border-info bg-background/80 px-2.5 py-1 text-[11px] font-semibold text-info"><ShieldCheck className="h-3.5 w-3.5" />Verify a flag · {verifyKeys.current.get(patchKey(t))}/{VERIFY_VOTES_NEEDED} votes</div>}
-                <SkyCanvas target={t} opts={opts} className="mx-auto block aspect-square w-full max-w-[40dvh] sm:max-w-none" />
+                <SkyCanvas target={t} opts={opts} className="mx-auto block aspect-square w-full max-w-[36dvh] sm:max-w-none" />
                 {hint && <div className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl border-4 px-4 py-1 font-display text-3xl font-black ${hint === "FLAG" ? "border-success text-success" : hint === "STATIC" ? "border-destructive text-destructive" : "border-info text-info"}`}>{hint}</div>}
               </div>
               <div className="flex flex-col justify-between space-y-2 p-3 sm:space-y-3 sm:p-4">
@@ -183,8 +183,8 @@ function Feed() {
             <button aria-label="Deep dive" onClick={inspect} className="grid h-12 w-12 shrink-0 place-items-center rounded-full border-2 border-info text-info transition active:scale-90"><Star className="h-6 w-6" /></button>
             <button aria-label="Flag anomaly" onClick={() => void flag("Unknown anomaly")} className="grid h-14 w-14 shrink-0 place-items-center rounded-full border-2 border-success sm:h-16 sm:w-16 text-success transition active:scale-90"><Globe className="h-8 w-8" /></button>
           </div>
-          <p className="mt-2 text-center text-[11px] text-muted-foreground">← static · ↑ inspect · something changes →</p>
-          <div className="mt-1 text-center"><button onClick={skip} className="inline-flex items-center gap-1 text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"><SkipForward className="h-3 w-3" />Not sure — skip</button></div>
+          <p className="mt-2 hidden text-center text-[11px] text-muted-foreground sm:block">← static · ↑ inspect · something changes →</p>
+          <div className="mt-1 text-center sm:mt-1"><button onClick={skip} className="inline-flex items-center gap-1 text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"><SkipForward className="h-3 w-3" />Not sure — skip</button></div>
         </div>
         <aside className="hidden space-y-4 lg:block">
           <div className="rounded-2xl border border-border bg-card p-5">
