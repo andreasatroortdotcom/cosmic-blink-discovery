@@ -9,9 +9,9 @@ import { TARGETS, CLASSES, EPOCHS, BANDS, fmtRA, fmtDec, parseQuery, targetForCo
 import { useStats } from "@/lib/store";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-type S = { ra?: number; dec?: number; fov?: number };
+type S = { ra?: number | undefined; dec?: number | undefined; fov?: number | undefined };
 export const Route = createFileRoute("/")({
-  validateSearch: (s: Record<string, unknown>): S => ({
+  validateSearch: (s: { ra?: unknown; dec?: unknown; fov?: unknown }): S => ({
     ra: s.ra !== undefined && isFinite(Number(s.ra)) ? Number(s.ra) : undefined,
     dec: s.dec !== undefined && isFinite(Number(s.dec)) ? Number(s.dec) : undefined,
     fov: s.fov !== undefined && isFinite(Number(s.fov)) ? Number(s.fov) : undefined,
@@ -40,7 +40,7 @@ function Feed() {
   const [q, setQ] = useState("");
   const [drag, setDrag] = useState({ x: 0, y: 0, active: false });
   const start = useRef({ x: 0, y: 0 });
-  const t = deck[idx % deck.length];
+  const t = deck[idx % deck.length]!;
 
   const next = () => { setIdx((i) => i + 1); setDrag({ x: 0, y: 0, active: false }); };
   const pass = () => { review(); toast("Static sky logged", { description: t.name }); next(); };
@@ -50,7 +50,7 @@ function Feed() {
     setClassify(false); toast.success("Added to your Discovery Log", { description: `${cls} · ${t.name}` }); next();
   };
   const load = (x: Target) => { const i = deck.findIndex((d) => d.id === x.id); if (i >= 0) setIdx(i); else nav({ to: "/", search: { ra: x.ra, dec: x.dec } }); };
-  const doSearch = (e: React.FormEvent) => { e.preventDefault(); const r = parseQuery(q); if (!r) return toast.error("Try a name or “RA Dec”, e.g. 08h55m10.8s -07d14m42.5s"); setIdx(0); nav({ to: "/", search: { ra: r.ra, dec: r.dec, fov: opts.fov } }); };
+  const doSearch = (e: React.FormEvent) => { e.preventDefault(); const r = parseQuery(q); if (!r) { toast.error("Try a name or “RA Dec”, e.g. 08h55m10.8s -07d14m42.5s"); return; } setIdx(0); nav({ to: "/", search: { ra: r.ra, dec: r.dec, fov: opts.fov } }); };
 
   const up = () => { const { x, y } = drag; if (x > 110) { setDrag({ ...drag, active: false }); setClassify(true); } else if (x < -110) pass(); else if (y < -110) inspect(); else setDrag({ x: 0, y: 0, active: false }); };
   const hint = drag.x > 40 ? "FLAG" : drag.x < -40 ? "STATIC" : drag.y < -40 ? "INSPECT" : null;

@@ -7,9 +7,9 @@ import { SkyCanvas, type ViewOpts } from "@/components/SkyCanvas";
 import { SkyControls } from "@/components/SkyControls";
 import { fmtRA, fmtDec, spectrum, targetForCoords, EPOCHS, buildField } from "@/lib/sky";
 
-type S = { ra: number; dec: number; fov?: number };
+type S = { ra: number; dec: number; fov?: number | undefined };
 export const Route = createFileRoute("/inspect")({
-  validateSearch: (s: Record<string, unknown>): S => ({ ra: Number(s.ra ?? 269.452) || 0, dec: Number(s.dec ?? 4.6934) || 0, fov: s.fov !== undefined ? Number(s.fov) : undefined }),
+  validateSearch: (s: { ra?: unknown; dec?: unknown; fov?: unknown }): S => ({ ra: Number(s.ra ?? 269.452) || 0, dec: Number(s.dec ?? 4.6934) || 0, fov: s.fov !== undefined ? Number(s.fov) : undefined }),
   head: () => ({ meta: [
     { title: "Deep Dive Inspector — Astroswipe" },
     { name: "description", content: "Inspect a SPHEREx sky patch: 102-band infrared spectrum, epochs, coordinates and report export." },
