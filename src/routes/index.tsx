@@ -36,7 +36,7 @@ function Feed() {
     return TARGETS;
   }, [search.ra, search.dec]);
   const [deck, setDeck] = useState<Target[]>(base);
-  const [endless, setEndless] = useState(false);
+  const [endless, setEndless] = useState(true);
   const seen = useRef<Set<string>>(new Set());
   // Never serve a patch this volunteer already reviewed (except an explicitly linked one).
   const freshRandom = () => { for (let i = 0; i < 50; i++) { const p = randomPatch(); if (!seen.current.has(patchKey(p))) return p; } return randomPatch(); };
@@ -46,7 +46,7 @@ function Feed() {
   };
   const linked = search.ra !== undefined && search.dec !== undefined;
   useEffect(() => {
-    seen.current = seenSet(); setDeck(filterSeen(base, linked)); setIdx(0);
+    seen.current = seenSet(); setDeck(linked ? filterSeen(base, true) : Array.from({ length: 5 }, () => freshRandom())); setIdx(0); setEndless(!linked);
     void syncSeen().then((s) => { seen.current = s; setDeck((d) => filterSeen(d, linked)); });
   }, [base]); // eslint-disable-line react-hooks/exhaustive-deps
   const [idx, setIdx] = useState(0);
