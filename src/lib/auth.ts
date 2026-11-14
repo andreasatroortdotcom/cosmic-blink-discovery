@@ -10,7 +10,7 @@ export function useUser() {
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((e, s) => {
       // Guest reviews from this browser move onto the account at sign-in.
-      if (e === "SIGNED_IN" && s?.user) void ensureSession().then(() => supabase.rpc("claim_guest_swipes", { _session: sessionId(), _secret: sessionSecret() })); setUser(s?.user ?? null); setReady(true); });
+      if (e === "SIGNED_IN" && s?.user) void ensureSession().then(() => supabase.rpc("claim_guest_swipes", { _session: sessionId(), _secret: sessionSecret() })).then(() => import("./badges").then((b) => b.syncBadgesToAccount())); setUser(s?.user ?? null); setReady(true); });
     void supabase.auth.getSession().then(({ data: d }) => { setUser(d.session?.user ?? null); setReady(true); });
     return () => data.subscription.unsubscribe();
   }, []);

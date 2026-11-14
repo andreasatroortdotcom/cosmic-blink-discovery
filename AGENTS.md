@@ -33,3 +33,4 @@ use the editor.
 - Random sky patches are derived deterministically from rounded RA/Dec so any shared coordinate link rebuilds the identical patch.
 - Guest swipes are claimed onto an account via the claim_guest_swipes RPC at sign-in; final rulings on second-review patches go through the rule_patch RPC, which checks the caller's points server-side.
 - Swipe abuse limits (one vote per session per patch, per-session/per-network rate caps, per-network flag cap per patch) are enforced by a database trigger and unique constraint, never only in the client.
+- Badge unlocks are stored per account (user_badges) and public profiles at /u/$id read through the public_profile RPC; profiles/swipes stay own-row only so no raw rows leak.
