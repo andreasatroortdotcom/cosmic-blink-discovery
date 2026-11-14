@@ -14,10 +14,67 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      swipes: {
+        Row: {
+          candidate_type: string | null
+          constellation: string
+          created_at: string
+          dec: number
+          id: string
+          patch_id: string
+          ra: number
+          user_session_id: string
+          verdict: string
+        }
+        Insert: {
+          candidate_type?: string | null
+          constellation?: string
+          created_at?: string
+          dec: number
+          id?: string
+          patch_id: string
+          ra: number
+          user_session_id: string
+          verdict: string
+        }
+        Update: {
+          candidate_type?: string | null
+          constellation?: string
+          created_at?: string
+          dec?: number
+          id?: string
+          patch_id?: string
+          ra?: number
+          user_session_id?: string
+          verdict?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      candidate_patches: {
+        Row: {
+          constellation: string | null
+          dec: number | null
+          flaggers: number | null
+          flags: number | null
+          last_at: string | null
+          patch_id: string | null
+          ra: number | null
+          static_votes: number | null
+          top_type: string | null
+        }
+        Relationships: []
+      }
+      swipe_stats: {
+        Row: {
+          anomalies_flagged: number | null
+          patches_inspected: number | null
+          total_swipes: number | null
+          volunteers: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
