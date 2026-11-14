@@ -7,7 +7,7 @@ const G = <svg aria-hidden="true" width="18" height="18" xmlns="http://www.w3.or
 export function GoogleButton({ label = "Continue with Google" }: { label?: string }) {
   return (
     <button onClick={() => signInWithGoogle().catch(() => toast.error("Google sign-in failed"))}
-      className="google-btn inline-flex items-center gap-[10px] rounded-full border px-3 py-1.5 text-sm font-medium">
+      className="google-btn inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full border px-2.5 py-1.5 text-sm font-medium sm:px-3">
       {G}{label}
     </button>
   );

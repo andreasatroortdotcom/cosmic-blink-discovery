@@ -147,8 +147,8 @@ function Feed() {
         ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,460px)_1fr]">
-        <div className="mx-auto w-full max-w-[460px]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,460px)_1fr]">
+        <div className="mx-auto w-full min-w-0 max-w-[460px]">
           <div className="relative">
             <div className="absolute inset-x-4 top-3 h-full rounded-3xl border border-border bg-card/40" />
             <article

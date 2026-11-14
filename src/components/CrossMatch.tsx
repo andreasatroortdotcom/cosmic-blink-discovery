@@ -4,14 +4,25 @@ import { SkyCanvas, type ViewOpts } from "./SkyCanvas";
 import type { Target } from "@/lib/sky";
 
 export const SURVEYS = [
-  { id: "CDS/P/DSS2/color", name: "DSS2 Optical", meta: "Visible · 1980s–1990s" },
-  { id: "CDS/P/2MASS/color", name: "2MASS", meta: "Near-IR J/H/Ks · 1997–2001" },
-  { id: "CDS/P/allWISE/color", name: "AllWISE", meta: "Mid-IR 3.4/4.6 µm · 2010–2011" },
-  { id: "CDS/P/unWISE/color-W2-W1W2-W1", name: "unWISE / NEOWISE", meta: "W1+W2 · 2010–2020 coadd" },
+  { id: "CDS/P/DSS2/color", sv: "DSS2 Red", name: "DSS2 Optical", meta: "Visible · 1980s–1990s" },
+  { id: "CDS/P/2MASS/color", sv: "2MASS-K", name: "2MASS", meta: "Near-IR J/H/Ks · 1997–2001" },
+  { id: "CDS/P/allWISE/color", sv: "WISE 3.4", name: "AllWISE", meta: "Mid-IR 3.4/4.6 µm · 2010–2011" },
+  { id: "CDS/P/unWISE/color-W2-W1W2-W1", sv: "WISE 4.6", name: "unWISE / NEOWISE", meta: "W1+W2 · 2010–2020 coadd" },
 ] as const;
 
 export function cutoutUrl(hips: string, ra: number, dec: number, fovDeg: number, px = 300) {
   return `https://alasky.cds.unistra.fr/hips-image-services/hips2fits?hips=${encodeURIComponent(hips)}&width=${px}&height=${px}&fov=${fovDeg}&projection=TAN&coordsys=icrs&ra=${ra}&dec=${dec}&format=jpg&stretch=asinh`;
+}
+/** NASA SkyView cutout, used when the CDS image service doesn't answer. */
+export function skyviewUrl(survey: string, ra: number, dec: number, fovDeg: number, px = 300) {
+  return `https://skyview.gsfc.nasa.gov/current/cgi/runquery.pl?Survey=${encodeURIComponent(survey)}&Position=${ra},${dec}&Size=${fovDeg}&Pixels=${px}&Return=JPEG`;
+}
+function Cutout({ s, ra, dec, fovDeg }: { s: (typeof SURVEYS)[number]; ra: number; dec: number; fovDeg: number }) {
+  const srcs = [cutoutUrl(s.id, ra, dec, fovDeg), skyviewUrl(s.sv, ra, dec, fovDeg)];
+  const [i, setI] = useState(0);
+  useEffect(() => setI(0), [ra, dec, fovDeg]);
+  if (i >= srcs.length) return <div className="grid h-full w-full place-items-center p-3 text-center text-[11px] text-muted-foreground">{s.name} archive is offline right now — use IRSA below.</div>;
+  return <img src={srcs[i]} onError={() => setI((n) => n + 1)} alt={`${s.name} image at RA ${ra.toFixed(3)} Dec ${dec.toFixed(3)}`} loading="lazy" className="h-full w-full object-cover" />;
 }
 export function externalLinks(ra: number, dec: number) {
   const c = `${ra.toFixed(5)} ${dec >= 0 ? "+" : ""}${dec.toFixed(5)}`;
@@ -78,13 +89,12 @@ export function CrossMatch({ target, opts }: { target: Target; opts: ViewOpts })
         {(blink ? [SURVEYS[bi === 0 ? 1 : 2]!] : SURVEYS).map((s) => (
           <figure key={blink ? "blink" : s.id} className="space-y-1">
             <div className="relative aspect-square overflow-hidden rounded-xl border border-border bg-background">
-              <img src={cutoutUrl(s.id, target.ra, target.dec, fovDeg)} alt={`${s.name} image at RA ${target.ra.toFixed(3)} Dec ${target.dec.toFixed(3)}`} loading="lazy" className="h-full w-full object-cover" />
+              <Cutout s={s} ra={target.ra} dec={target.dec} fovDeg={fovDeg} />
               <Cross />
             </div>
             <figcaption className="text-[11px]"><b>{s.name}</b> <span className="text-muted-foreground">· {s.meta}</span></figcaption>
           </figure>
         ))}
-        {blink && <link rel="preload" as="image" href={cutoutUrl(SURVEYS[bi === 0 ? 2 : 1].id, target.ra, target.dec, fovDeg)} />}
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <button onClick={() => setLive((v) => !v)} className="inline-flex items-center gap-1.5 rounded-full border border-primary px-3 py-1.5 text-xs font-semibold text-primary"><MousePointer2 className="h-3.5 w-3.5" />{live ? "Hide" : "Open"} interactive Aladin Lite</button>
@@ -94,7 +104,7 @@ export function CrossMatch({ target, opts }: { target: Target; opts: ViewOpts })
       <div className="mt-3 flex flex-wrap gap-2 text-xs">
         {externalLinks(target.ra, target.dec).map((l) => <a key={l.name} href={l.href} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 hover:border-primary hover:text-primary">{l.name}<ExternalLink className="h-3 w-3" /></a>)}
       </div>
-      <p className="mt-2 text-[10px] text-muted-foreground">Historical images: CDS HiPS (DSS2, 2MASS, AllWISE, unWISE). SPHEREx tile is the app's simulated field.</p>
+      <p className="mt-2 text-[10px] text-muted-foreground">Historical images: CDS HiPS, falling back to NASA SkyView. SPHEREx tile is the app's simulated field.</p>
     </section>
   );
 }
