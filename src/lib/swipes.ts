@@ -5,7 +5,7 @@ import { patchKey } from "./sky";
 export const CLASS_TO_DB: Record<Classification, string> = {
   "Planet X candidate": "planet_x", "Brown Dwarf candidate": "brown_dwarf", "Asteroid/Comet": "asteroid_comet", "Variable Star": "variable_star", "Unknown anomaly": "unknown",
 };
-export const DB_TO_LABEL: Record<string, string> = { planet_x: "Planet X candidate", brown_dwarf: "Brown dwarf", asteroid_comet: "Asteroid / comet", variable_star: "Variable star", unknown: "Unknown anomaly" };
+export const DB_TO_LABEL: Record<string, string> = { planet_x: "Planet X candidate", brown_dwarf: "Brown dwarf", asteroid_comet: "Asteroid / comet", variable_star: "Variable star", unknown: "Something changed" };
 
 const SKEY = "astroswipe.session.v1";
 export function sessionId() {

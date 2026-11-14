@@ -26,7 +26,7 @@ export function Guide() {
           </section>
           <section className="space-y-3">
             <h3 className="font-mono text-[10px] uppercase tracking-widest text-accent">2 · Swipe actions</h3>
-            <Row icon={<Globe className="h-4 w-4" />} tone="border-success text-success" title="Swipe right · green button">Flag as a candidate: anomaly, moving object, Planet X, brown dwarf or variable star.</Row>
+            <Row icon={<Globe className="h-4 w-4" />} tone="border-success text-success" title="Swipe right · green button">Something changed — a moving or brightening object. No need to classify; that comes later.</Row>
             <Row icon={<X className="h-4 w-4" />} tone="border-destructive text-destructive" title="Swipe left · red button">Static sky — nothing moves.</Row>
             <Row icon={<Star className="h-4 w-4" />} tone="border-info text-info" title="Swipe up · blue star">Deep dive with spectrum and details.</Row>
           </section>
