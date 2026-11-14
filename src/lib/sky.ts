@@ -74,7 +74,7 @@ export function spectrum(t: Target) {
   const r = mulberry(seedOf(t.id + "sed"));
   const vals = WAVELENGTHS.map((w) => bandFlux(main.temp, w) * (1 + (r() - 0.5) * 0.08));
   const max = Math.max(...vals, 1e-9);
-  return { temp: main.temp, points: WAVELENGTHS.map((w, i) => ({ w, f: vals[i] / max })) };
+  return { temp: main.temp, points: WAVELENGTHS.map((w, i) => ({ w, f: (vals[i] ?? 0) / max })) };
 }
 
 // ---- coordinates ----
