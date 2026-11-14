@@ -36,6 +36,13 @@
       "when": 1794690790805,
       "tag": "0004_claim_bonus_rulings",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794693053182,
+      "tag": "0005_guest_session_claim_secret",
+      "breakpoints": true
     }
   ]
 }
