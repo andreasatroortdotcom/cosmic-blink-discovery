@@ -4,7 +4,7 @@ import { BadgeCheck } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { BadgeGrid } from "@/components/BadgeGrid";
 import { ShareImageDialog } from "@/components/ShareImageDialog";
-import { fetchPublicProfile, BADGES } from "@/lib/badges";
+import { fetchPublicProfile, BADGES, unlockedIds } from "@/lib/badges";
 import { renderPassport } from "@/lib/shareCard";
 import { rankFor, streak } from "@/lib/sky";
 
@@ -30,6 +30,7 @@ function PublicProfilePage() {
       {(q.isError || (q.isSuccess && !p)) && <p className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">This profile doesn't exist. <Link to="/" search={{}} className="text-primary underline">Start your own hunt</Link>.</p>}
       {p && (() => {
         const rank = rankFor({ reviewed: p.reviewed, flags: [], days: p.days });
+        const badges = [...new Set([...p.badges, ...unlockedIds({ reviewed: p.reviewed, flagKinds: [], events: {} })])];
         const st = streak(p.days, new Date().toISOString().slice(0, 10));
         return (<>
           <section className="mb-6 rounded-3xl border border-border bg-card p-5 shadow-glow">
@@ -43,13 +44,13 @@ function PublicProfilePage() {
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
               <ShareImageDialog label="Passport card" className="inline-flex items-center gap-2 rounded-full border border-accent px-4 py-2 text-sm font-semibold text-accent"
-                render={() => renderPassport({ callsign: p.display_name, rank, reviewed: p.reviewed, flagged: p.flagged, streak: st, badges: p.badges })}
+                render={() => renderPassport({ callsign: p.display_name, rank, reviewed: p.reviewed, flagged: p.flagged, streak: st, badges })}
                 filename={`astroswipe-passport-${p.display_name}.png`} title="Researcher passport" shareText={`${p.display_name} — ${rank} on Astroswipe`} shareUrl={typeof window !== "undefined" ? window.location.href : undefined} />
               <Link to="/" search={{}} className="inline-flex items-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Join the hunt</Link>
             </div>
           </section>
-          <h2 className="mb-3 font-display text-lg font-semibold">Badges <span className="font-mono text-sm text-muted-foreground">{p.badges.length}/{BADGES.length}</span></h2>
-          <BadgeGrid ctx={{ reviewed: p.reviewed, flagKinds: [], events: {} }} unlocked={p.badges} />
+          <h2 className="mb-3 font-display text-lg font-semibold">Badges <span className="font-mono text-sm text-muted-foreground">{badges.length}/{BADGES.length}</span></h2>
+          <BadgeGrid ctx={{ reviewed: p.reviewed, flagKinds: [], events: {} }} unlocked={badges} />
         </>);
       })()}
     </Shell>
