@@ -35,7 +35,7 @@ export function buildReport(i: ReportInput) {
     gaia: uncatalogued.length
       ? "Gaia DR3 cross-match checked: No known high-proper-motion source at this position (Uncataloged candidate)"
       : "Gaia DR3 cross-match checked: Position matches a catalogued source",
-    url: `${i.origin}/inspect?ra=${i.ra}&dec=${i.dec}&fov=${fov}`,
+    url: `${i.origin}/inspect?ra=${i.ra}&dec=${i.dec}&fov=${+fov.toFixed(2)}`,
     generated: new Date().toISOString(),
   };
 }
