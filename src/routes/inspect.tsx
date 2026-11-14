@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { DiscoveryShare } from "@/components/ShareImageDialog";
+import { markEvent } from "@/lib/badges";
 import { ArrowLeft, Copy, Download, AudioLines } from "lucide-react";
 import { CrossMatch } from "@/components/CrossMatch";
 import { sonify } from "@/lib/audio";
@@ -32,6 +34,7 @@ function Inspect() {
   const main = buildField(t).find((s) => s.anomaly || s.var || Math.abs(s.vx) > 0.01);
   const pm = main ? (Math.hypot(main.vx, main.vy) * 6 * 60 * 2).toFixed(2) : "0";
   const muted = useMuted();
+  useEffect(() => { markEvent("spectral"); }, [ra, dec]);
   const [playing, setPlaying] = useState(false);
   const play = () => {
     const secs = sonify(sed.points.map((p) => p.f));
@@ -75,6 +78,7 @@ function Inspect() {
           <div className="flex flex-wrap gap-2">
             <button onClick={() => { navigator.clipboard.writeText(url); toast.success("Share link copied"); }} className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm"><Copy className="h-4 w-4" />Copy share link</button>
             <button onClick={report} className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"><Download className="h-4 w-4" />Export report</button>
+            <DiscoveryShare name={t.name} ra={ra} dec={dec} constellation={t.constellation} className="inline-flex items-center gap-2 rounded-full border border-accent px-4 py-2 text-sm font-semibold text-accent" />
           </div>
           <p className="break-all font-mono text-[10px] text-muted-foreground">?ra={ra}&dec={dec}&fov={opts.fov}</p>
         </div>

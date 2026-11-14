@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { renderDiscoveryCard, SHARE_HOST } from "@/lib/shareCard";
 import { Download, ImageIcon, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -9,7 +10,8 @@ export function ShareImageDialog({ render, filename, title, shareText, shareUrl,
 }) {
   const [open, setOpen] = useState(false);
   const [src, setSrc] = useState<string | null>(null);
-  useEffect(() => { if (!open) return; const id = setTimeout(() => { try { setSrc(render().toDataURL("image/png")); } catch { toast.error("Couldn't render the card"); } }, 30); return () => clearTimeout(id); }, [open, render]);
+  const renderRef = useRef(render); renderRef.current = render;
+  useEffect(() => { if (!open) return; const id = setTimeout(() => { try { setSrc(renderRef.current().toDataURL("image/png")); } catch { toast.error("Couldn't render the card"); } }, 30); return () => clearTimeout(id); }, [open]);
   const blob = async () => (await fetch(src!)).blob();
   const download = () => { if (!src) return; const a = document.createElement("a"); a.href = src; a.download = filename; a.click(); };
   const share = async () => {
@@ -41,9 +43,6 @@ export function ShareImageDialog({ render, filename, title, shareText, shareUrl,
 }
 
 export function DiscoveryShare(p: { name: string; ra: number; dec: number; constellation?: string | null; consensus?: number | null; votes?: number; className?: string }) {
-  const [{ renderDiscoveryCard, SHARE_HOST }, setMod] = useState<typeof import("@/lib/shareCard") | Record<string, never>>({} as never);
-  useEffect(() => { void import("@/lib/shareCard").then(setMod); }, []);
-  if (!renderDiscoveryCard) return null;
   const url = `https://${SHARE_HOST}/inspect?ra=${p.ra}&dec=${p.dec}`;
   return <ShareImageDialog className={p.className} render={() => renderDiscoveryCard(p)} filename={`astroswipe-${p.ra.toFixed(3)}_${p.dec.toFixed(3)}.png`} title="Share discovery card" shareText={`I spotted something in the SPHEREx sky: ${p.name} — help verify it on Astroswipe!`} shareUrl={url} />;
 }
