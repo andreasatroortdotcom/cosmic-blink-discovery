@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as InspectRouteImport } from './routes/inspect'
+import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as LogRouteImport } from './routes/log'
 import { Route as RadarRouteImport } from './routes/radar'
 
@@ -30,6 +31,11 @@ const InspectRoute = InspectRouteImport.update({
   path: '/inspect',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LeaderboardRoute = LeaderboardRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LogRoute = LogRouteImport.update({
   id: '/log',
   path: '/log',
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/community': typeof CommunityRoute
   '/inspect': typeof InspectRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/log': typeof LogRoute
   '/radar': typeof RadarRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/community': typeof CommunityRoute
   '/inspect': typeof InspectRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/log': typeof LogRoute
   '/radar': typeof RadarRoute
 }
@@ -60,21 +68,31 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/community': typeof CommunityRoute
   '/inspect': typeof InspectRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/log': typeof LogRoute
   '/radar': typeof RadarRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/community' | '/inspect' | '/log' | '/radar'
+  fullPaths:
+    '/' | '/community' | '/inspect' | '/leaderboard' | '/log' | '/radar'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/community' | '/inspect' | '/log' | '/radar'
-  id: '__root__' | '/' | '/community' | '/inspect' | '/log' | '/radar'
+  to: '/' | '/community' | '/inspect' | '/leaderboard' | '/log' | '/radar'
+  id:
+    | '__root__'
+    | '/'
+    | '/community'
+    | '/inspect'
+    | '/leaderboard'
+    | '/log'
+    | '/radar'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CommunityRoute: typeof CommunityRoute
   InspectRoute: typeof InspectRoute
+  LeaderboardRoute: typeof LeaderboardRoute
   LogRoute: typeof LogRoute
   RadarRoute: typeof RadarRoute
 }
@@ -102,6 +120,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InspectRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/leaderboard': {
+      id: '/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof LeaderboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/log': {
       id: '/log'
       path: '/log'
@@ -123,6 +148,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CommunityRoute: CommunityRoute,
   InspectRoute: InspectRoute,
+  LeaderboardRoute: LeaderboardRoute,
   LogRoute: LogRoute,
   RadarRoute: RadarRoute,
 }
