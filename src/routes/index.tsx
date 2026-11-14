@@ -73,8 +73,8 @@ function Feed() {
     else if (r === "error") toast.error("Couldn't save that review");
     return r === "ok";
   };
-  const pass = async () => { const r = await recordSwipe(t, "static"); if (r === "rate_limited") return report(r); if (report(r)) { review(); toast("Static sky logged", { description: t.name }); } next(); };
-  const skip = async () => { const r = await recordSwipe(t, "skipped"); if (r === "rate_limited") return report(r); report(r); next(); };
+  const pass = async () => { const r = await recordSwipe(t, "static"); if (r === "rate_limited") { report(r); return; } if (report(r)) { review(); toast("Static sky logged", { description: t.name }); } next(); };
+  const skip = async () => { const r = await recordSwipe(t, "skipped"); if (r === "rate_limited") { report(r); return; } report(r); next(); };
   const randomNow = () => { const rp = freshRandom(); setDeck((d) => [...d.slice(0, idx + 1), rp, ...d.slice(idx + 1)]); setIdx((i) => i + 1); };
   const toggleEndless = () => {
     if (endless) { setEndless(false); setDeck(filterSeen(base, false)); setIdx(0); return; }
