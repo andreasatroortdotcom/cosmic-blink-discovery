@@ -13,6 +13,24 @@ export function sessionId() {
   if (!id) { id = crypto.randomUUID(); localStorage.setItem(SKEY, id); }
   return id;
 }
+const SECRET = "astroswipe.session.secret.v1";
+export function sessionSecret() {
+  let v = localStorage.getItem(SECRET);
+  if (!v) { v = crypto.randomUUID() + crypto.randomUUID(); localStorage.setItem(SECRET, v); }
+  return v;
+}
+let registered: Promise<void> | null = null;
+/** Bind this browser's session id to a private secret; start a fresh session if the old one can't be proven. */
+export function ensureSession() {
+  registered ??= (async () => {
+    const { data } = await supabase.rpc("register_guest_session", { _session: sessionId(), _secret: sessionSecret() });
+    if (data === false) {
+      localStorage.setItem(SKEY, crypto.randomUUID());
+      await supabase.rpc("register_guest_session", { _session: sessionId(), _secret: sessionSecret() });
+    }
+  })();
+  return registered;
+}
 const SEEN = "astroswipe.seen.v1";
 export function seenSet(): Set<string> {
   try { return new Set(JSON.parse(localStorage.getItem(SEEN) || "[]")); } catch { return new Set(); }
@@ -26,6 +44,7 @@ export async function syncSeen() {
 export type SwipeResult = "ok" | "duplicate" | "rate_limited" | "error";
 export async function recordSwipe(t: Target, verdict: "candidate" | "static" | "skipped", cls?: Classification): Promise<SwipeResult> {
   const id = patchKey(t);
+  await ensureSession();
   const { error } = await supabase.from("swipes").insert({
     patch_id: id, ra: t.ra, dec: t.dec, constellation: t.constellation, verdict,
     candidate_type: cls ? CLASS_TO_DB[cls] : null, user_session_id: sessionId(),
