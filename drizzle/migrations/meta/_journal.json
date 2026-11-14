@@ -43,6 +43,13 @@
       "when": 1794693053182,
       "tag": "0005_guest_session_claim_secret",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794693118107,
+      "tag": "0006_private_swipes_profiles_public_aggregates",
+      "breakpoints": true
     }
   ]
 }

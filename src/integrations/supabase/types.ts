@@ -183,6 +183,10 @@ export type Database = {
         Args: { _patch: string; _ruling: string }
         Returns: undefined
       }
+      session_seen_patches: {
+        Args: { _secret: string; _session: string }
+        Returns: string[]
+      }
     }
     Enums: {
       [_ in never]: never

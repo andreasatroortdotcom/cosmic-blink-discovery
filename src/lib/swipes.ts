@@ -38,8 +38,9 @@ export function seenSet(): Set<string> {
 export function markSeen(id: string) { const s = seenSet(); s.add(id); localStorage.setItem(SEEN, JSON.stringify([...s])); }
 /** Merge patches this browser session already reviewed according to the server. */
 export async function syncSeen() {
-  const { data } = await supabase.from("swipes").select("patch_id").eq("user_session_id", sessionId()).limit(1000);
-  const s = seenSet(); data?.forEach((r) => s.add(r.patch_id)); localStorage.setItem(SEEN, JSON.stringify([...s])); return s;
+  await ensureSession();
+  const { data } = await supabase.rpc("session_seen_patches", { _session: sessionId(), _secret: sessionSecret() });
+  const s = seenSet(); (data as string[] | null)?.forEach((p) => s.add(p)); localStorage.setItem(SEEN, JSON.stringify([...s])); return s;
 }
 export type SwipeResult = "ok" | "duplicate" | "rate_limited" | "error";
 export async function recordSwipe(t: Target, verdict: "candidate" | "static" | "skipped", cls?: Classification): Promise<SwipeResult> {
