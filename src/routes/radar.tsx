@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { fmtRA, fmtDec } from "@/lib/sky";
 import { DB_TO_LABEL } from "@/lib/swipes";
 import { toast } from "sonner";
+import { ReportDialog } from "@/components/ReportDialog";
 import { useUser } from "@/lib/auth";
 import { canMakeFinalCall } from "@/lib/points";
 
@@ -80,6 +81,7 @@ function RadarPage() {
                 <button onClick={() => void rule(c.patch_id!, "confirmed")} className="rounded-full border border-success px-3 py-1.5 text-xs font-semibold text-success">Confirm</button>
                 <button onClick={() => void rule(c.patch_id!, "rejected")} className="rounded-full border border-destructive px-3 py-1.5 text-xs font-semibold text-destructive">Reject</button>
               </>)}
+              <ReportDialog input={{ patchId: c.patch_id ?? "", ra: c.ra ?? 0, dec: c.dec ?? 0, constellation: c.constellation, flags: 1 + (c.yes_votes ?? 0), flaggers: 1 + (c.yes_votes ?? 0), staticVotes: c.no_votes ?? 0, classification: ok ? "Something changed — community confirmed" : rej ? "Rejected on final review" : "Something changed — second review", firstSpotted: c.flagged_at }} />
               <Link to="/inspect" search={{ ra: c.ra ?? 0, dec: c.dec ?? 0 }} className="rounded-full border border-primary px-4 py-1.5 text-xs font-semibold text-primary">Deep dive</Link>
             </div>
           </li>);
@@ -97,7 +99,8 @@ function RadarPage() {
                 <div className="flex items-center gap-2 font-medium">{hot && <span className="inline-flex items-center gap-1 rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-semibold text-accent"><Flame className="h-3 w-3" />High priority</span>}{c.constellation || "Unknown"} <span className="rounded bg-primary/15 px-1.5 py-0.5 text-[10px] text-primary">{DB_TO_LABEL[c.top_type ?? "unknown"] ?? c.top_type}</span></div>
                 <div className="font-mono text-[11px] text-muted-foreground">{fmtRA(c.ra ?? 0)} {fmtDec(c.dec ?? 0)} · {c.flags} flags by {c.flaggers} volunteer{c.flaggers === 1 ? "" : "s"} · {c.static_votes} static</div>
               </div>
-              <Link to="/" search={{ ra: c.ra ?? 0, dec: c.dec ?? 0 }} className="rounded-full bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground">Inspect & vote</Link>
+              <div className="flex gap-2"><ReportDialog input={{ patchId: c.patch_id ?? "", ra: c.ra ?? 0, dec: c.dec ?? 0, constellation: c.constellation, flags: c.flags ?? 0, flaggers: c.flaggers ?? 0, staticVotes: c.static_votes ?? 0, classification: DB_TO_LABEL[c.top_type ?? "unknown"] ?? "Something changed", lastSpotted: c.last_at }} />
+              <Link to="/" search={{ ra: c.ra ?? 0, dec: c.dec ?? 0 }} className="rounded-full bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground">Inspect & vote</Link></div>
             </li>
           );
         })}
