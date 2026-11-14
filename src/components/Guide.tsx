@@ -15,7 +15,7 @@ export function Guide() {
     <>
       <button aria-label="Open guide" onClick={() => setOpen(true)} className="grid h-8 w-8 place-items-center rounded-full border border-border text-muted-foreground hover:border-primary hover:text-primary"><HelpCircle className="h-4 w-4" /></button>
       <Dialog open={open} onOpenChange={close}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[85dvh] w-[calc(100vw-1.5rem)] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display text-xl">Welcome to Astroswipe</DialogTitle>
             <DialogDescription>Help find moving objects in NASA's SPHEREx data.</DialogDescription>

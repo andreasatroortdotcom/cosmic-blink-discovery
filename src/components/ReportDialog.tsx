@@ -21,7 +21,7 @@ export function ReportDialog({ input, open: openProp, onOpenChange, hideTrigger 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {!hideTrigger && <DialogTrigger asChild><button className="inline-flex items-center gap-1.5 rounded-full border border-accent px-3 py-1.5 text-xs font-semibold text-accent"><FileText className="h-3.5 w-3.5" />Export report</button></DialogTrigger>}
-      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+      <DialogContent className="max-h-[85dvh] w-[calc(100vw-1.5rem)] max-w-2xl overflow-y-auto">
         <DialogHeader><DialogTitle className="font-display">NASA Citizen Science Candidate Report</DialogTitle></DialogHeader>
         {r && (<div className="space-y-4 text-sm">
           <div className="rounded-xl border border-border bg-secondary/40 p-3 font-mono text-xs">
