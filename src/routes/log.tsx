@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Trash2, Award, Flame } from "lucide-react";
 import { Shell } from "@/components/Shell";
+import { DiscoveryShare } from "@/components/ShareImageDialog";
 import { useStats } from "@/lib/store";
 import { rankFor, streak, fmtRA, fmtDec } from "@/lib/sky";
 
@@ -49,6 +50,7 @@ function Log() {
                 <div className="font-medium">{f.name} <span className="ml-1 rounded bg-primary/15 px-1.5 py-0.5 text-[10px] text-primary">{f.cls === "Unknown anomaly" ? "Something changed" : f.cls}</span></div>
                 <div className="font-mono text-[11px] text-muted-foreground">{fmtRA(f.ra)} {fmtDec(f.dec)} · {new Date(f.at).toLocaleString()}</div>
               </Link>
+              <DiscoveryShare name={f.name} ra={f.ra} dec={f.dec} />
               <button aria-label="Remove" onClick={() => removeFlag(f.id)} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
             </li>
           ))}
