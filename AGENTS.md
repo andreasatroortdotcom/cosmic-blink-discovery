@@ -28,3 +28,6 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+- Community swipes are stored anonymously (per-browser session id, no login) with public read/insert, per the challenge brief; aggregates come from database views, not client-side math.
+- Random sky patches are derived deterministically from rounded RA/Dec so any shared coordinate link rebuilds the identical patch.
