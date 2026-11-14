@@ -17,6 +17,7 @@ import { Route as LogRouteImport } from './routes/log'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RadarRouteImport } from './routes/radar'
 import { Route as ScienceRouteImport } from './routes/science'
+import { Route as UIdRouteImport } from './routes/u.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,6 +59,11 @@ const ScienceRoute = ScienceRouteImport.update({
   path: '/science',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UIdRoute = UIdRouteImport.update({
+  id: '/u/$id',
+  path: '/u/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -68,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/radar': typeof RadarRoute
   '/science': typeof ScienceRoute
+  '/u/$id': typeof UIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/radar': typeof RadarRoute
   '/science': typeof ScienceRoute
+  '/u/$id': typeof UIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +97,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/radar': typeof RadarRoute
   '/science': typeof ScienceRoute
+  '/u/$id': typeof UIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +110,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/radar'
     | '/science'
+    | '/u/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/radar'
     | '/science'
+    | '/u/$id'
   id:
     | '__root__'
     | '/'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/radar'
     | '/science'
+    | '/u/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -132,6 +144,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   RadarRoute: typeof RadarRoute
   ScienceRoute: typeof ScienceRoute
+  UIdRoute: typeof UIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -192,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ScienceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/u/$id': {
+      id: '/u/$id'
+      path: '/u/$id'
+      fullPath: '/u/$id'
+      preLoaderRoute: typeof UIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -204,6 +224,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   RadarRoute: RadarRoute,
   ScienceRoute: ScienceRoute,
+  UIdRoute: UIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
