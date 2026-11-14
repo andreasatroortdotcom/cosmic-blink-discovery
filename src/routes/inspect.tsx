@@ -55,7 +55,7 @@ function Inspect() {
           <SkyControls opts={opts} set={setOpts} />
         </div>
         <div className="space-y-4">
-          <div><h1 className="font-display text-2xl font-bold">{t.name}</h1><p className="text-sm text-muted-foreground">{t.constellation} · {t.blurb}</p></div>
+          <div><h1 className="font-display text-2xl font-bold"><span className="sr-only">Deep dive inspection of </span>{t.name}</h1><p className="text-sm text-muted-foreground">{t.constellation} · {t.blurb}</p></div>
           <dl className="grid grid-cols-2 gap-2 font-mono text-xs">
             {[["RA", fmtRA(ra)], ["Dec", fmtDec(dec)], ["RA (deg)", ra.toFixed(5)], ["Dec (deg)", dec.toFixed(5)], ["Motion", `${pm}″/yr`], ["Fit T_eff", `${Math.round(sed.temp)} K`]].map(([k, v]) => (
               <div key={k} className="rounded-lg border border-border bg-card p-2"><dt className="text-muted-foreground">{k}</dt><dd className="text-sm">{v}</dd></div>
