@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Orbit, BookMarked, Users, Telescope } from "lucide-react";
 import type { ReactNode } from "react";
+import { Guide } from "./Guide";
 export function Shell({ children }: { children: ReactNode }) {
   const l = "flex flex-col items-center gap-0.5 text-[10px] text-muted-foreground [&.active]:text-primary";
   return (
@@ -8,7 +9,7 @@ export function Shell({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <Link to="/" className="flex items-center gap-2 font-display text-lg font-bold tracking-tight"><Orbit className="h-5 w-5 text-primary" />Astro<span className="text-glow text-primary">swipe</span></Link>
-          <span className="hidden font-mono text-[10px] uppercase tracking-widest text-muted-foreground sm:block">SPHEREx · Planet X Hunt</span>
+          <div className="flex items-center gap-3"><span className="hidden font-mono text-[10px] uppercase tracking-widest text-muted-foreground sm:block">SPHEREx · Planet X Hunt</span><Guide /></div>
         </div>
       </header>
       <main className="mx-auto max-w-5xl px-4 py-4">{children}</main>
