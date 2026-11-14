@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { tick, resonance } from "@/lib/audio";
 import { buildField, bandFlux, BAND_UM, EPOCHS, type BandId, type Target } from "@/lib/sky";
 
 export interface ViewOpts { diff: boolean; gaia: boolean; band: BandId; fov: number; speed: number; playing?: boolean }
@@ -14,6 +15,8 @@ export function SkyCanvas({ target, opts, onEpoch, className }: { target: Target
   const field = useMemo(() => buildField(target), [target]);
   const epoch = useRef(0);
   const [ep, setEp] = useState(0);
+  const prevDiff = useRef(opts.diff);
+  useEffect(() => { if (prevDiff.current !== opts.diff) resonance(opts.diff); prevDiff.current = opts.diff; }, [opts.diff]);
 
   useEffect(() => {
     const c = ref.current!; const ctx = c.getContext("2d")!;
@@ -60,7 +63,7 @@ export function SkyCanvas({ target, opts, onEpoch, className }: { target: Target
     };
     draw();
     if (opts.playing === false) return;
-    const id = setInterval(() => { epoch.current = (epoch.current + 1) % EPOCHS.length; if (opts.diff && epoch.current === 0) epoch.current = 1; draw(); }, 900 / opts.speed);
+    const id = setInterval(() => { epoch.current = (epoch.current + 1) % EPOCHS.length; if (opts.diff && epoch.current === 0) epoch.current = 1; draw(); tick(); }, 900 / opts.speed);
     return () => clearInterval(id);
   }, [field, opts, onEpoch]);
 

@@ -12,6 +12,9 @@ import { useUser } from "@/lib/auth";
 import { isVerifySlot, POINTS, VERIFY_VOTES_NEEDED } from "@/lib/points";
 import { ShieldCheck } from "lucide-react";
 import { patchKey } from "@/lib/sky";
+import { chime } from "@/lib/audio";
+import { setTourStep, useTourStep } from "@/lib/tour";
+import { ReportDialog } from "@/components/ReportDialog";
 
 type S = { ra?: number | undefined; dec?: number | undefined; fov?: number | undefined };
 export const Route = createFileRoute("/")({
@@ -67,6 +70,16 @@ function Feed() {
   const [drag, setDrag] = useState({ x: 0, y: 0, active: false });
   const start = useRef({ x: 0, y: 0 });
   const t = deck[Math.min(idx, deck.length - 1)]!;
+  // Judge tour: drive the real card through WISE 0855 → difference → Gaia → simulated flag + report.
+  const tour = useTourStep();
+  const wise = TARGETS.find((x) => x.id === "wise0855")!;
+  useEffect(() => {
+    if (tour === null) return;
+    if (tour === 0) { if (search.ra !== wise.ra || search.dec !== wise.dec) void nav({ to: "/", search: { ra: wise.ra, dec: wise.dec } }); setIdx(0); setOpts((o) => ({ ...o, diff: false, gaia: false, band: "composite", speed: 1 })); }
+    if (tour === 1) setOpts((o) => ({ ...o, diff: true, gaia: false }));
+    if (tour === 2) setOpts((o) => ({ ...o, diff: false, gaia: true }));
+    if (tour === 3) { chime(); toast.success("Simulated flag: something changed", { description: "Demo only — no vote was recorded." }); }
+  }, [tour]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const next = () => {
     seen.current.add(patchKey(t));
@@ -102,6 +115,7 @@ function Feed() {
     const r = await recordSwipe(t, "candidate", cls);
     if (r === "rate_limited") { report(r); return; }
     if (!report(r)) { next(); return; }
+    chime();
     review({ id: `${t.id}-${Date.now()}`, targetId: t.id, name: t.name, ra: t.ra, dec: t.dec, cls, at: Date.now() });
     if (!user) toast.success("Flagged: something changed", { description: "Sign in with Google to earn points for your discoveries" });
     else if (isVerify) award(POINTS.review + POINTS.verify, "Verification vote counted");
@@ -188,7 +202,8 @@ function Feed() {
           </div>
         </aside>
       </div>
-
+      <ReportDialog hideTrigger open={tour === 3} onOpenChange={(o) => { if (!o) setTourStep(null); }}
+        input={{ patchId: patchKey(wise), ra: wise.ra, dec: wise.dec, constellation: wise.constellation, fov: wise.fov, flags: 1, flaggers: 1, staticVotes: 0, classification: "Something changed — brown dwarf benchmark (tour demo)" }} />
     </Shell>
   );
 }

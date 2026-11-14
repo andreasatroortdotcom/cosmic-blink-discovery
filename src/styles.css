@@ -169,3 +169,7 @@ body { font-family: var(--font-sans); background-image: radial-gradient(ellipse 
 @utility no-scrollbar { scrollbar-width: none; &::-webkit-scrollbar { display: none; } }
 
 .google-btn { background: #131314; border-color: #8e918f; color: #e3e3e3; font-family: "Google Sans", ui-sans-serif, system-ui, sans-serif; line-height: 20px; font-size: 14px; }
+
+@keyframes tour-glow { 0%,100% { box-shadow: 0 0 6px color-mix(in oklab, var(--accent) 50%, transparent); } 50% { box-shadow: 0 0 18px color-mix(in oklab, var(--accent) 90%, transparent); } }
+.tour-glow { animation: tour-glow 2.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .tour-glow { animation: none; } }
