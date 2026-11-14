@@ -85,7 +85,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Astroswipe — SPHEREx citizen science" },
       { name: "description", content: "Swipe through SPHEREx sky epochs to discover moving objects and Planet X candidates." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Astroswipe" },
+      { property: "og:title", content: "Astroswipe — SPHEREx citizen science sky hunt" },
       { property: "og:description", content: "Swipe through SPHEREx sky epochs to discover moving objects and Planet X candidates." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

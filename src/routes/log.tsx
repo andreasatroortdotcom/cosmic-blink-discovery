@@ -24,9 +24,10 @@ function Log() {
   const st = streak(stats.days, new Date().toISOString().slice(0, 10));
   return (
     <Shell>
+      <h1 className="mb-3 font-display text-2xl font-bold">Discovery Log</h1>
       <div className="mb-6 rounded-3xl border border-border bg-card p-6 shadow-glow">
         <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Current rank</p>
-        <h1 className="font-display text-3xl font-bold text-glow text-primary">{rank}</h1>
+        <p className="font-display text-3xl font-bold text-glow text-primary">{rank}</p>
         <div className="mt-4 grid grid-cols-3 gap-3 text-center">
           {[["Reviewed", stats.reviewed], ["Flagged", stats.flags.length], ["Day streak", st]].map(([k, v]) => (
             <div key={k} className="rounded-xl bg-secondary/60 p-3"><div className="font-display text-2xl font-bold">{v}</div><div className="text-[11px] text-muted-foreground">{k}</div></div>
@@ -37,7 +38,7 @@ function Log() {
         </div>
         {st > 0 && <p className="mt-3 inline-flex items-center gap-1 text-xs text-warning"><Flame className="h-3 w-3" />Keep the streak alive tomorrow!</p>}
       </div>
-      <h2 className="mb-3 font-display text-lg font-semibold">Discovery Log</h2>
+      <h2 className="mb-3 font-display text-lg font-semibold">Flagged candidates</h2>
       {stats.flags.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">No candidates yet. <Link to="/" search={{}} className="text-primary underline">Start swiping</Link> and flag anything that moves.</p>
       ) : (
