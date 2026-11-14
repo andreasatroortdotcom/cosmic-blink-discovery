@@ -17,7 +17,7 @@ export function SkyCanvas({ target, opts, onEpoch, className }: { target: Target
   useEffect(() => {
     const c = ref.current!; const ctx = c.getContext("2d")!;
     const S = c.width; const zoom = 1 / opts.fov; const um = BAND_UM[opts.band];
-    const P = (x: number, y: number) => [S / 2 + x * zoom * S / 2, S / 2 + y * zoom * S / 2];
+    const P = (x: number, y: number): [number, number] => [S / 2 + x * zoom * S / 2, S / 2 + y * zoom * S / 2];
     const bright = (s: (typeof field)[0], e: number) => {
       const f = opts.band === "composite" ? 1 : Math.min(2.2, bandFlux(s.temp, um) / Math.max(bandFlux(s.temp, 2), 0.05));
       return s.mag * f * (1 + s.var * Math.sin(e * 2.1 + 0.4));

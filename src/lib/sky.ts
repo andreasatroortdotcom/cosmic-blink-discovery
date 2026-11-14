@@ -70,7 +70,7 @@ export const WAVELENGTHS = Array.from({ length: 102 }, (_, i) => 0.75 * Math.pow
 
 export function spectrum(t: Target) {
   const f = buildField(t);
-  const main = f.find((s) => s.anomaly) ?? f.find((s) => s.var || s.vx > 0.01) ?? f[0];
+  const main = f.find((s) => s.anomaly) ?? f.find((s) => s.var || s.vx > 0.01) ?? f[0]!;
   const r = mulberry(seedOf(t.id + "sed"));
   const vals = WAVELENGTHS.map((w) => bandFlux(main.temp, w) * (1 + (r() - 0.5) * 0.08));
   const max = Math.max(...vals, 1e-9);
@@ -90,10 +90,10 @@ export function parseQuery(q: string): { ra: number; dec: number; target?: Targe
   const parts = s.replace(/,/g, " ").split(/\s+/);
   if (parts.length < 2) return null;
   const sex = (p: string) => p.split(/[hdms:°′″'"]+/).filter(Boolean).map(Number);
-  const [a, b] = [parts[0], parts.slice(1).join("")];
+  const a = parts[0]!, b = parts.slice(1).join("");
   const isSex = /[hms:]/.test(a);
   let ra: number, dec: number;
-  if (isSex) { const [h, m = 0, sc = 0] = sex(a); ra = (h + m / 60 + sc / 3600) * 15; const neg = /^[-−]/.test(b); const [d, dm = 0, ds = 0] = sex(b.replace(/^[-−+]/, "")); dec = (neg ? -1 : 1) * (d + dm / 60 + ds / 3600); }
+  if (isSex) { const [h = NaN, m = 0, sc = 0] = sex(a); ra = (h + m / 60 + sc / 3600) * 15; const neg = /^[-−]/.test(b); const [d = NaN, dm = 0, ds = 0] = sex(b.replace(/^[-−+]/, "")); dec = (neg ? -1 : 1) * (d + dm / 60 + ds / 3600); }
   else { ra = Number(a); dec = Number(b.replace("−", "-")); }
   if (!isFinite(ra) || !isFinite(dec) || ra < 0 || ra >= 360 || Math.abs(dec) > 90) return null;
   return { ra, dec };
@@ -103,7 +103,7 @@ export function targetForCoords(ra: number, dec: number): Target {
   if (near) return near;
   const kinds: Kind[] = ["static", "static", "asteroid", "variable", "brown-dwarf", "static"];
   const r = mulberry(seedOf(`${ra.toFixed(3)},${dec.toFixed(3)}`));
-  return { id: `c${ra.toFixed(3)}_${dec.toFixed(3)}`, name: `Custom field ${fmtRA(ra).slice(0, 6)}`, constellation: "Custom", ra, dec, kind: kinds[Math.floor(r() * kinds.length)], blurb: "User-requested coordinates." };
+  return { id: `c${ra.toFixed(3)}_${dec.toFixed(3)}`, name: `Custom field ${fmtRA(ra).slice(0, 6)}`, constellation: "Custom", ra, dec, kind: kinds[Math.floor(r() * kinds.length)] ?? "static", blurb: "User-requested coordinates." };
 }
 
 // ---- gamification ----

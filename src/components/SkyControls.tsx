@@ -23,7 +23,7 @@ export function SkyControls({ opts, set }: { opts: ViewOpts; set: (o: ViewOpts) 
         </select>
         <div className="flex w-40 items-center gap-2">
           <span className="font-mono text-[10px] text-muted-foreground">FOV</span>
-          <Slider min={0.3} max={1.5} step={0.05} value={[opts.fov]} onValueChange={([v]) => set({ ...opts, fov: v })} />
+          <Slider min={0.3} max={1.5} step={0.05} value={[opts.fov]} onValueChange={([v]) => set({ ...opts, fov: v ?? 1 })} />
           <span className="w-8 font-mono text-[10px]">{(opts.fov * 6).toFixed(1)}′</span>
         </div>
       </div>
