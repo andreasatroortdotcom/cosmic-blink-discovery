@@ -15,6 +15,7 @@ import { patchKey } from "@/lib/sky";
 import { chime } from "@/lib/audio";
 import { setTourStep, useTourStep } from "@/lib/tour";
 import { ReportDialog } from "@/components/ReportDialog";
+import { markEvent } from "@/lib/badges";
 
 type S = { ra?: number | undefined; dec?: number | undefined; fov?: number | undefined };
 export const Route = createFileRoute("/")({
@@ -101,7 +102,7 @@ function Feed() {
     else if (r === "error") toast.error("Couldn't save that review");
     return r === "ok";
   };
-  const pass = async () => { const r = await recordSwipe(t, "static"); if (r === "rate_limited") { report(r); return; } if (report(r)) { review(); if (user) award(isVerify ? POINTS.review + POINTS.verify : POINTS.review, isVerify ? "Verification vote counted" : t.name); else toast("Static sky logged", { description: t.name }); } next(); };
+  const pass = async () => { if (isVerify) markEvent("validator"); const r = await recordSwipe(t, "static"); if (r === "rate_limited") { report(r); return; } if (report(r)) { review(); if (user) award(isVerify ? POINTS.review + POINTS.verify : POINTS.review, isVerify ? "Verification vote counted" : t.name); else toast("Static sky logged", { description: t.name }); } next(); };
   const skip = async () => { const r = await recordSwipe(t, "skipped"); if (r === "rate_limited") { report(r); return; } report(r); next(); };
   const randomNow = () => { const rp = freshRandom(); setDeck((d) => [...d.slice(0, idx + 1), rp, ...d.slice(idx + 1)]); setIdx((i) => i + 1); };
   const toggleEndless = () => {
@@ -115,7 +116,7 @@ function Feed() {
     const r = await recordSwipe(t, "candidate", cls);
     if (r === "rate_limited") { report(r); return; }
     if (!report(r)) { next(); return; }
-    chime();
+    chime(); if (isVerify) markEvent("validator");
     review({ id: `${t.id}-${Date.now()}`, targetId: t.id, name: t.name, ra: t.ra, dec: t.dec, cls, at: Date.now() });
     if (!user) toast.success("Flagged: something changed", { description: "Sign in with Google to earn points for your discoveries" });
     else if (isVerify) award(POINTS.review + POINTS.verify, "Verification vote counted");

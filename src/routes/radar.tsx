@@ -7,6 +7,8 @@ import { fmtRA, fmtDec } from "@/lib/sky";
 import { DB_TO_LABEL } from "@/lib/swipes";
 import { toast } from "sonner";
 import { ReportDialog } from "@/components/ReportDialog";
+import { DiscoveryShare } from "@/components/ShareImageDialog";
+import { markEvent } from "@/lib/badges";
 import { useUser } from "@/lib/auth";
 import { canMakeFinalCall } from "@/lib/points";
 
@@ -46,7 +48,7 @@ function RadarPage() {
   const rule = async (patch: string, ruling: "confirmed" | "rejected") => {
     const { error } = await supabase.rpc("rule_patch", { _patch: patch, _ruling: ruling });
     if (error) toast.error(error.message.includes("OWN_FLAG") ? "You can't judge your own discovery" : "Couldn't save your ruling");
-    else { toast.success(ruling === "confirmed" ? "Confirmed — discoverer gets the bonus" : "Rejected"); void review.refetch(); }
+    else { markEvent("validator"); toast.success(ruling === "confirmed" ? "Confirmed — discoverer gets the bonus" : "Rejected"); void review.refetch(); }
   };
   const s = stats.data;
   const cards = [
@@ -77,6 +79,7 @@ function RadarPage() {
                 <button onClick={() => void rule(c.patch_id!, "rejected")} className="rounded-full border border-destructive px-3 py-1.5 text-xs font-semibold text-destructive">Reject</button>
               </>)}
               <ReportDialog input={{ patchId: c.patch_id ?? "", ra: c.ra ?? 0, dec: c.dec ?? 0, constellation: c.constellation, flags: 1 + (c.yes_votes ?? 0), flaggers: 1 + (c.yes_votes ?? 0), staticVotes: c.no_votes ?? 0, classification: ok ? "Something changed — community confirmed" : rej ? "Rejected on final review" : "Something changed — second review", firstSpotted: c.flagged_at }} />
+              <DiscoveryShare name={`${c.constellation || "Sky"} candidate`} ra={c.ra ?? 0} dec={c.dec ?? 0} constellation={c.constellation} consensus={n ? (c.yes_votes ?? 0) / n : null} votes={n} />
               <Link to="/inspect" search={{ ra: c.ra ?? 0, dec: c.dec ?? 0 }} className="rounded-full border border-primary px-4 py-1.5 text-xs font-semibold text-primary">Deep dive</Link>
             </div>
           </li>);
@@ -95,7 +98,8 @@ function RadarPage() {
                 <div className="font-mono text-[11px] text-muted-foreground">{fmtRA(c.ra ?? 0)} {fmtDec(c.dec ?? 0)} · {c.flags} flags by {c.flaggers} volunteer{c.flaggers === 1 ? "" : "s"} · {c.static_votes} static</div>
               </div>
               <div className="flex gap-2"><ReportDialog input={{ patchId: c.patch_id ?? "", ra: c.ra ?? 0, dec: c.dec ?? 0, constellation: c.constellation, flags: c.flags ?? 0, flaggers: c.flaggers ?? 0, staticVotes: c.static_votes ?? 0, classification: DB_TO_LABEL[c.top_type ?? "unknown"] ?? "Something changed", lastSpotted: c.last_at }} />
-              <Link to="/" search={{ ra: c.ra ?? 0, dec: c.dec ?? 0 }} className="rounded-full bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground">Inspect & vote</Link></div>
+              <DiscoveryShare name={`${c.constellation || "Sky"} candidate`} ra={c.ra ?? 0} dec={c.dec ?? 0} constellation={c.constellation} consensus={(c.flaggers ?? 0) + (c.static_votes ?? 0) ? (c.flaggers ?? 0) / ((c.flaggers ?? 0) + (c.static_votes ?? 0)) : null} votes={(c.flaggers ?? 0) + (c.static_votes ?? 0)} />
+              <Link to="/" search={{ ra: c.ra ?? 0, dec: c.dec ?? 0 }} onClick={() => markEvent("validator")} className="rounded-full bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground">Inspect & vote</Link></div>
             </li>
           );
         })}

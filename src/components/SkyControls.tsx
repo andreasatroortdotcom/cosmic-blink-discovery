@@ -1,6 +1,7 @@
 import { BANDS, type BandId } from "@/lib/sky";
 import type { ViewOpts } from "./SkyCanvas";
 import { Slider } from "@/components/ui/slider";
+import { markEvent } from "@/lib/badges";
 import { Layers, Crosshair, Gauge } from "lucide-react";
 
 export function SkyControls({ opts, set }: { opts: ViewOpts; set: (o: ViewOpts) => void }) {
@@ -8,8 +9,8 @@ export function SkyControls({ opts, set }: { opts: ViewOpts; set: (o: ViewOpts) 
   return (
     <div className="space-y-2 sm:space-y-3" onPointerDown={(e) => e.stopPropagation()}>
       <div className="flex flex-wrap gap-1.5 sm:gap-2">
-        <button aria-pressed={opts.diff} className={chip(opts.diff)} onClick={() => set({ ...opts, diff: !opts.diff })}><Layers className="h-3.5 w-3.5" /><span className="sm:hidden">Diff</span><span className="hidden sm:inline">Difference</span></button>
-        <button aria-pressed={opts.gaia} className={chip(opts.gaia)} onClick={() => set({ ...opts, gaia: !opts.gaia })}><Crosshair className="h-3.5 w-3.5" />Gaia<span className="hidden sm:inline"> overlay</span></button>
+        <button aria-pressed={opts.diff} className={chip(opts.diff)} onClick={() => { if (!opts.diff) markEvent("diff"); set({ ...opts, diff: !opts.diff }); }}><Layers className="h-3.5 w-3.5" /><span className="sm:hidden">Diff</span><span className="hidden sm:inline">Difference</span></button>
+        <button aria-pressed={opts.gaia} className={chip(opts.gaia)} onClick={() => { if (!opts.gaia) markEvent("gaia"); set({ ...opts, gaia: !opts.gaia }); }}><Crosshair className="h-3.5 w-3.5" />Gaia<span className="hidden sm:inline"> overlay</span></button>
         <div className="inline-flex items-center gap-1 rounded-full border border-border px-1 py-0.5">
           <Gauge className="ml-2 h-3.5 w-3.5 text-muted-foreground" />
           {[["Slow", 0.5, "½×"], ["Normal", 1, "1×"], ["Fast", 2.2, "2×"]].map(([l, v, sh]) => (

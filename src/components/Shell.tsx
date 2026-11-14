@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Orbit, BookMarked, Users, Telescope, Radar, Trophy, Atom } from "lucide-react";
+import { Orbit, BookMarked, Users, Telescope, Radar, Trophy, Atom, UserRound } from "lucide-react";
 import { AuthButton } from "./AuthButton";
 import type { ReactNode } from "react";
 import { Guide } from "./Guide";
@@ -11,7 +11,7 @@ export function Shell({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-3 py-2 sm:px-4 sm:py-3">
           <Link to="/" className="flex shrink-0 items-center gap-1.5 font-display text-base sm:text-lg font-bold tracking-tight"><Orbit className="h-5 w-5 text-primary" />Astro<span className="text-glow text-primary">swipe</span></Link>
-          <div className="flex min-w-0 items-center gap-1.5 sm:gap-2"><span className="hidden font-mono text-[10px] uppercase tracking-widest text-muted-foreground lg:block">SPHEREx · Planet X Hunt</span><TourButton /><SoundToggle /><Guide /><AuthButton /></div>
+          <div className="flex min-w-0 items-center gap-1.5 sm:gap-2"><span className="hidden font-mono text-[10px] uppercase tracking-widest text-muted-foreground lg:block">SPHEREx · Planet X Hunt</span><TourButton /><SoundToggle /><Guide /><Link to="/profile" aria-label="Researcher passport" title="Researcher passport" className="rounded-full p-1.5 text-muted-foreground hover:text-foreground [&.active]:text-primary"><UserRound className="h-5 w-5" /></Link><AuthButton /></div>
         </div>
       </header>
       <main className="mx-auto max-w-5xl px-3 py-3 sm:px-4 sm:py-4">{children}</main>
