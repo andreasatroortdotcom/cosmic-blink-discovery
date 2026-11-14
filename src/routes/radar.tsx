@@ -6,6 +6,9 @@ import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
 import { fmtRA, fmtDec } from "@/lib/sky";
 import { DB_TO_LABEL } from "@/lib/swipes";
+import { toast } from "sonner";
+import { useUser } from "@/lib/auth";
+import { canMakeFinalCall } from "@/lib/points";
 
 export const Route = createFileRoute("/radar")({
   head: () => ({ meta: [
@@ -27,7 +30,7 @@ function useRadar() {
     if (error) throw error; return data ?? [];
   } });
   const review = useQuery({ queryKey: ["radar", "verify"], refetchInterval: 15000, queryFn: async () => {
-    const { data, error } = await supabase.from("patch_verification").select("*").in("status", ["confirmed", "second_review"]).order("flagged_at", { ascending: false }).limit(50);
+    const { data, error } = await supabase.from("patch_verification").select("*").in("status", ["confirmed", "second_review", "rejected"]).order("flagged_at", { ascending: false }).limit(50);
     if (error) throw error; return data ?? [];
   } });
   return { stats, top, review };
@@ -35,6 +38,16 @@ function useRadar() {
 
 function RadarPage() {
   const { stats, top, review } = useRadar();
+  const { user } = useUser();
+  const me = useQuery({ queryKey: ["radar", "me", user?.id], enabled: !!user, queryFn: async () => {
+    const { data } = await supabase.from("leaderboard").select("points").eq("user_id", user!.id).maybeSingle(); return data?.points ?? 0;
+  } });
+  const judge = canMakeFinalCall(me.data ?? 0);
+  const rule = async (patch: string, ruling: "confirmed" | "rejected") => {
+    const { error } = await supabase.rpc("rule_patch", { _patch: patch, _ruling: ruling });
+    if (error) toast.error(error.message.includes("OWN_FLAG") ? "You can't judge your own discovery" : "Couldn't save your ruling");
+    else { toast.success(ruling === "confirmed" ? "Confirmed — discoverer gets the bonus" : "Rejected"); void review.refetch(); }
+  };
   useEffect(() => {
     const ch = supabase.channel(`radar-${crypto.randomUUID()}`).on("postgres_changes", { event: "INSERT", schema: "public", table: "swipes" }, () => { void stats.refetch(); void top.refetch(); void review.refetch(); }).subscribe();
     return () => { void supabase.removeChannel(ch); };
@@ -58,11 +71,17 @@ function RadarPage() {
       {!!review.data?.length && (<>
         <h2 className="mb-3 font-display text-lg font-semibold">Verified &amp; second review</h2>
         <ul className="mb-6 space-y-2">{review.data.map((c) => {
-          const ok = c.status === "confirmed"; const n = (c.yes_votes ?? 0) + (c.no_votes ?? 0);
-          return (<li key={c.patch_id} className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card p-3 ${ok ? "border-success" : "border-info"}`}>
-            <div><div className="flex items-center gap-2 font-medium"><span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${ok ? "bg-success/15 text-success" : "bg-info/15 text-info"}`}>{ok ? "Confirmed by community" : "Second review"}</span>{c.constellation || "Unknown"}</div>
+          const ok = c.status === "confirmed"; const rej = c.status === "rejected"; const n = (c.yes_votes ?? 0) + (c.no_votes ?? 0);
+          return (<li key={c.patch_id} className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card p-3 ${ok ? "border-success" : rej ? "border-border opacity-70" : "border-info"}`}>
+            <div><div className="flex items-center gap-2 font-medium"><span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${ok ? "bg-success/15 text-success" : "bg-info/15 text-info"}`}>{ok ? "Confirmed" : rej ? "Rejected" : "Second review"}</span>{c.constellation || "Unknown"}</div>
             <div className="font-mono text-[11px] text-muted-foreground">{fmtRA(c.ra ?? 0)} {fmtDec(c.dec ?? 0)} · {Math.round((100 * (c.yes_votes ?? 0)) / Math.max(n, 1))}% agree of {n} verifiers</div></div>
-            <Link to="/inspect" search={{ ra: c.ra ?? 0, dec: c.dec ?? 0 }} className="rounded-full border border-primary px-4 py-1.5 text-xs font-semibold text-primary">Deep dive</Link>
+            <div className="flex gap-2">
+              {c.status === "second_review" && judge && c.discoverer_id !== user?.id && (<>
+                <button onClick={() => void rule(c.patch_id!, "confirmed")} className="rounded-full border border-success px-3 py-1.5 text-xs font-semibold text-success">Confirm</button>
+                <button onClick={() => void rule(c.patch_id!, "rejected")} className="rounded-full border border-destructive px-3 py-1.5 text-xs font-semibold text-destructive">Reject</button>
+              </>)}
+              <Link to="/inspect" search={{ ra: c.ra ?? 0, dec: c.dec ?? 0 }} className="rounded-full border border-primary px-4 py-1.5 text-xs font-semibold text-primary">Deep dive</Link>
+            </div>
           </li>);
         })}</ul>
       </>)}
