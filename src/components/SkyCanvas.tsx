@@ -10,7 +10,7 @@ function tint(band: BandId, temp: number) {
   return [80 + 175 * (r / m), 80 + 175 * (g / m), 80 + 175 * (b / m)];
 }
 
-export function SkyCanvas({ target, opts, onEpoch, className }: { target: Target; opts: ViewOpts; onEpoch?: (i: number) => void; className?: string }) {
+export function SkyCanvas({ target, opts, onEpoch, className, bare }: { target: Target; opts: ViewOpts; onEpoch?: (i: number) => void; className?: string; bare?: boolean }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const field = useMemo(() => buildField(target), [target]);
   const epoch = useRef(0);
@@ -67,6 +67,8 @@ export function SkyCanvas({ target, opts, onEpoch, className }: { target: Target
     return () => clearInterval(id);
   }, [field, opts, onEpoch]);
 
+  const canvas = <canvas ref={ref} width={640} height={640} className={className} aria-label={`SPHEREx blink comparator of ${target.name}`} />;
+  if (bare) return canvas;
   return (
     <>
       <canvas ref={ref} width={640} height={640} className={className} aria-label={`SPHEREx blink comparator of ${target.name}`} />
