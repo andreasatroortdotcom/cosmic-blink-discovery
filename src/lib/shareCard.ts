@@ -57,7 +57,7 @@ export function renderDiscoveryCard(i: DiscoveryCardInput): HTMLCanvasElement {
   const rows: [string, string][] = [["RA", fmtRA(i.ra)], ["DEC", fmtDec(i.dec)], ["CONSTELLATION", i.constellation || targetForCoords(i.ra, i.dec).constellation], ["CONSENSUS", i.consensus == null ? "Awaiting votes" : `${Math.round(i.consensus * 100)}%${i.votes ? ` of ${i.votes}` : ""}`], ["WAVELENGTH", "0.75 – 5.0 µm"], ["BANDS", "102 spectral"]];
   rows.forEach(([k, v], n) => { const cx = 80 + (n % 2) * 470, cy = 1050 + Math.floor(n / 2) * 60;
     x.font = "500 20px 'JetBrains Mono', monospace"; x.fillStyle = C.mute; x.fillText(k, cx, cy);
-    x.font = "600 28px 'JetBrains Mono', monospace"; x.fillStyle = C.fg; x.fillText(v.slice(0, 24), cx + (k.length > 10 ? 210 : 120), cy); });
+    x.font = "600 28px 'JetBrains Mono', monospace"; x.fillStyle = C.fg; x.fillText(v.slice(0, 24), cx + 200, cy); });
   footer(x, w, h); return cv;
 }
 
