@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      guest_sessions: {
+        Row: {
+          created_at: string
+          secret_hash: string
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          secret_hash: string
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          secret_hash?: string
+          session_id?: string
+        }
+        Relationships: []
+      }
       patch_rulings: {
         Row: {
           created_at: string
@@ -153,7 +171,14 @@ export type Database = {
       }
     }
     Functions: {
-      claim_guest_swipes: { Args: { _session: string }; Returns: number }
+      claim_guest_swipes: {
+        Args: { _secret: string; _session: string }
+        Returns: number
+      }
+      register_guest_session: {
+        Args: { _secret: string; _session: string }
+        Returns: boolean
+      }
       rule_patch: {
         Args: { _patch: string; _ruling: string }
         Returns: undefined

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
-import { sessionId } from "@/lib/swipes";
+import { sessionId, sessionSecret, ensureSession } from "@/lib/swipes";
 
 export function useUser() {
   const [user, setUser] = useState<User | null>(null);
@@ -10,7 +10,7 @@ export function useUser() {
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((e, s) => {
       // Guest reviews from this browser move onto the account at sign-in.
-      if (e === "SIGNED_IN" && s?.user) void supabase.rpc("claim_guest_swipes", { _session: sessionId() }); setUser(s?.user ?? null); setReady(true); });
+      if (e === "SIGNED_IN" && s?.user) void ensureSession().then(() => supabase.rpc("claim_guest_swipes", { _session: sessionId(), _secret: sessionSecret() })); setUser(s?.user ?? null); setReady(true); });
     void supabase.auth.getSession().then(({ data: d }) => { setUser(d.session?.user ?? null); setReady(true); });
     return () => data.subscription.unsubscribe();
   }, []);
