@@ -13,29 +13,29 @@ export function Guide() {
   );
   return (
     <>
-      <button aria-label="Öppna guiden" onClick={() => setOpen(true)} className="grid h-8 w-8 place-items-center rounded-full border border-border text-muted-foreground hover:border-primary hover:text-primary"><HelpCircle className="h-4 w-4" /></button>
+      <button aria-label="Open guide" onClick={() => setOpen(true)} className="grid h-8 w-8 place-items-center rounded-full border border-border text-muted-foreground hover:border-primary hover:text-primary"><HelpCircle className="h-4 w-4" /></button>
       <Dialog open={open} onOpenChange={close}>
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="font-display text-xl">Välkommen till Astroswipe</DialogTitle>
-            <DialogDescription>Hjälp till att hitta rörliga objekt i NASA:s SPHEREx-data.</DialogDescription>
+            <DialogTitle className="font-display text-xl">Welcome to Astroswipe</DialogTitle>
+            <DialogDescription>Help find moving objects in NASA's SPHEREx data.</DialogDescription>
           </DialogHeader>
           <section className="space-y-2">
-            <h3 className="font-mono text-[10px] uppercase tracking-widest text-accent">1 · Epok-blinkning</h3>
-            <Row icon={<Repeat className="h-4 w-4" />} tone="border-primary text-primary" title="Himlen fotograferas var 6:e månad">SPHEREx kartlägger hela himlen var sjätte månad. Bilden blinkar mellan dessa epoker – objekt som rört sig hoppar fram och tillbaka, och objekt som ändrat ljusstyrka pulserar.</Row>
+            <h3 className="font-mono text-[10px] uppercase tracking-widest text-accent">1 · Epoch blinking</h3>
+            <Row icon={<Repeat className="h-4 w-4" />} tone="border-primary text-primary" title="The sky is imaged every 6 months">SPHEREx maps the entire sky every six months. The image blinks between these epochs — objects that moved jump back and forth, and objects that changed brightness pulse.</Row>
           </section>
           <section className="space-y-3">
-            <h3 className="font-mono text-[10px] uppercase tracking-widest text-accent">2 · Swajpval</h3>
-            <Row icon={<Globe className="h-4 w-4" />} tone="border-success text-success" title="Swajpa höger · grön knapp">Flagga som kandidat: anomali, rörligt objekt, Planet X, brun dvärg eller variabel stjärna.</Row>
-            <Row icon={<X className="h-4 w-4" />} tone="border-destructive text-destructive" title="Swajpa vänster · röd knapp">Statisk himmel – inget rör sig.</Row>
-            <Row icon={<Star className="h-4 w-4" />} tone="border-info text-info" title="Swajpa upp · blå stjärna">Djupdykning med spektrum och detaljer.</Row>
+            <h3 className="font-mono text-[10px] uppercase tracking-widest text-accent">2 · Swipe actions</h3>
+            <Row icon={<Globe className="h-4 w-4" />} tone="border-success text-success" title="Swipe right · green button">Flag as a candidate: anomaly, moving object, Planet X, brown dwarf or variable star.</Row>
+            <Row icon={<X className="h-4 w-4" />} tone="border-destructive text-destructive" title="Swipe left · red button">Static sky — nothing moves.</Row>
+            <Row icon={<Star className="h-4 w-4" />} tone="border-info text-info" title="Swipe up · blue star">Deep dive with spectrum and details.</Row>
           </section>
           <section className="space-y-3">
-            <h3 className="font-mono text-[10px] uppercase tracking-widest text-accent">3 · Snabbverktyg</h3>
-            <Row icon={<Layers className="h-4 w-4" />} tone="border-border text-foreground" title="Skillnadsbild">Subtraherar första epoken – allt som är stilla försvinner, och rörelse syns som svart/vita par.</Row>
-            <Row icon={<Crosshair className="h-4 w-4" />} tone="border-border text-foreground" title="Gaia-lager">Ringar in kända stjärnor från Gaia-katalogen så att du kan bortse från dem. Rosa rutor = okända källor.</Row>
+            <h3 className="font-mono text-[10px] uppercase tracking-widest text-accent">3 · Quick tools</h3>
+            <Row icon={<Layers className="h-4 w-4" />} tone="border-border text-foreground" title="Difference image">Subtracts the first epoch — everything static disappears, and motion shows up as black/white pairs.</Row>
+            <Row icon={<Crosshair className="h-4 w-4" />} tone="border-border text-foreground" title="Gaia overlay">Circles known stars from the Gaia catalog so you can ignore them. Pink boxes = unknown sources.</Row>
           </section>
-          <button onClick={() => close(false)} className="mt-2 w-full rounded-full bg-primary py-3 font-semibold text-primary-foreground">Förstått – börja leta!</button>
+          <button onClick={() => close(false)} className="mt-2 w-full rounded-full bg-primary py-3 font-semibold text-primary-foreground">Got it — start hunting!</button>
         </DialogContent>
       </Dialog>
     </>
