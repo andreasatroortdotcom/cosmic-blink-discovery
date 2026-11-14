@@ -77,7 +77,7 @@ function Feed() {
   const skip = async () => { const r = await recordSwipe(t, "skipped"); if (r === "rate_limited") return report(r); report(r); next(); };
   const randomNow = () => { const rp = freshRandom(); setDeck((d) => [...d.slice(0, idx + 1), rp, ...d.slice(idx + 1)]); setIdx((i) => i + 1); };
   const toggleEndless = () => {
-    if (endless) { setEndless(false); setDeck(base); setIdx(0); return; }
+    if (endless) { setEndless(false); setDeck(filterSeen(base, false)); setIdx(0); return; }
     setEndless(true); setDeck(Array.from({ length: 5 }, () => freshRandom())); setIdx(0);
     toast("Endless Survey Mode", { description: "Random patches from across the whole sky." });
   };
