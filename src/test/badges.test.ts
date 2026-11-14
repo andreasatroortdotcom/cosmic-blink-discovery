@@ -10,5 +10,5 @@ describe("badges", () => {
   });
   it("Planet X Hunter from a planet-x flag", () => expect(unlockedIds({ ...base, flagKinds: ["planet-x"] })).toContain("planet-x-hunter"));
   it("Brown Dwarf Scout from a brown dwarf flag", () => expect(unlockedIds({ ...base, flagKinds: ["binary-bd"] })).toContain("brown-dwarf-scout"));
-  it("progress caps at goal", () => expect(progress(BADGES[1], { ...base, reviewed: 40 })).toBe(25));
+  it("progress caps at goal", () => expect(progress(BADGES[1]!, { ...base, reviewed: 40 })).toBe(25));
 });

@@ -5,7 +5,7 @@ export const SHARE_HOST = "cosmic-blink-discovery.lovable.app";
 const C = { bg0: "#05060f", bg1: "#14123a", cyan: "#4fe3ff", mag: "#ff4fd8", gold: "#ffc857", fg: "#eef2ff", mute: "#9aa3c7", line: "rgba(255,255,255,0.14)" };
 const KIND_LABEL: Record<Kind, string> = { "planet-x": "Planet X Candidate", "brown-dwarf": "Brown Dwarf", "binary-bd": "Brown Dwarf Binary", "high-pm": "High Proper-Motion Star", variable: "Variable Star", asteroid: "Moving Object", static: "Something changed" };
 
-export interface DiscoveryCardInput { name: string; ra: number; dec: number; constellation?: string | null; category?: string; consensus?: number | null; votes?: number }
+export interface DiscoveryCardInput { name: string; ra: number; dec: number; constellation?: string | null | undefined; category?: string; consensus?: number | null | undefined; votes?: number | undefined }
 /** Benchmark targets show their known type; random patches stay "Something changed" (binary verdict). */
 export function categoryFor(ra: number, dec: number) { const t = targetForCoords(ra, dec); return t.benchmark ? KIND_LABEL[t.kind] : "Something changed"; }
 

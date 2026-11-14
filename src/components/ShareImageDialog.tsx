@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 
 /** Generic "render a canvas card → preview → download / native share" dialog. */
 export function ShareImageDialog({ render, filename, title, shareText, shareUrl, label = "Share image", className }: {
-  render: () => HTMLCanvasElement; filename: string; title: string; shareText: string; shareUrl?: string; label?: string; className?: string;
+  render: () => HTMLCanvasElement; filename: string; title: string; shareText: string; shareUrl?: string | undefined; label?: string; className?: string | undefined;
 }) {
   const [open, setOpen] = useState(false);
   const [src, setSrc] = useState<string | null>(null);
@@ -18,8 +18,8 @@ export function ShareImageDialog({ render, filename, title, shareText, shareUrl,
     if (!src) return;
     const file = new File([await blob()], filename, { type: "image/png" });
     try {
-      if (navigator.canShare?.({ files: [file] })) await navigator.share({ files: [file], title, text: shareText, url: shareUrl });
-      else if (navigator.share) await navigator.share({ title, text: shareText, url: shareUrl });
+      if (navigator.canShare?.({ files: [file] })) await navigator.share({ files: [file], title, text: shareText, ...(shareUrl ? { url: shareUrl } : {}) });
+      else if (navigator.share) await navigator.share({ title, text: shareText, ...(shareUrl ? { url: shareUrl } : {}) });
       else { await navigator.clipboard.writeText(`${shareText} ${shareUrl ?? ""}`.trim()); toast.success("Sharing isn't supported here — link copied instead"); }
     } catch (e) { if ((e as Error).name !== "AbortError") toast.error("Sharing failed"); }
   };
@@ -42,7 +42,7 @@ export function ShareImageDialog({ render, filename, title, shareText, shareUrl,
   );
 }
 
-export function DiscoveryShare(p: { name: string; ra: number; dec: number; constellation?: string | null; consensus?: number | null; votes?: number; className?: string }) {
+export function DiscoveryShare(p: { name: string; ra: number; dec: number; constellation?: string | null; consensus?: number | null; votes?: number; className?: string | undefined }) {
   const url = `https://${SHARE_HOST}/inspect?ra=${p.ra}&dec=${p.dec}`;
   return <ShareImageDialog className={p.className} render={() => renderDiscoveryCard(p)} filename={`astroswipe-${p.ra.toFixed(3)}_${p.dec.toFixed(3)}.png`} title="Share discovery card" shareText={`I spotted something in the SPHEREx sky: ${p.name} — help verify it on Astroswipe!`} shareUrl={url} />;
 }
