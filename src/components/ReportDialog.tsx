@@ -38,7 +38,7 @@ function ReportContents({ input }: { input: Omit<ReportInput, "origin"> }) {
   const md = reportToMarkdown(r);
   const base = `astroswipe-${r.patchId}`;
   const run = async () => {
-    setBusy(true); setError(null); setReport((old) => confirmReport({ ...old, evidenceSummary: undefined }, false));
+    setBusy(true); setError(null); setReport((old) => { const { evidenceSummary: _previous, ...draft } = old; return confirmReport(draft, false); });
     try {
       const result = await generate({ data: { patchId: input.patchId, ra: input.ra, dec: input.dec,
         ...(input.fov !== undefined ? { fov: input.fov } : {}), demo: input.evidenceSource === "demo" } });
