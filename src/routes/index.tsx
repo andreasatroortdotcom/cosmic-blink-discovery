@@ -1,12 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, useRef, useState } from "react";
-import { X, Star, Globe, Search, Sparkles } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { X, Star, Globe, Search, Sparkles, Shuffle, Infinity as InfinityIcon, SkipForward } from "lucide-react";
 import { toast } from "sonner";
 import { Shell } from "@/components/Shell";
 import { SkyCanvas, type ViewOpts } from "@/components/SkyCanvas";
 import { SkyControls } from "@/components/SkyControls";
-import { TARGETS, CLASSES, EPOCHS, BANDS, fmtRA, fmtDec, parseQuery, targetForCoords, type Target, type Classification } from "@/lib/sky";
+import { TARGETS, CLASSES, EPOCHS, BANDS, fmtRA, fmtDec, parseQuery, targetForCoords, randomPatch, type Target, type Classification } from "@/lib/sky";
 import { useStats } from "@/lib/store";
+import { recordSwipe } from "@/lib/swipes";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type S = { ra?: number | undefined; dec?: number | undefined; fov?: number | undefined };
@@ -30,22 +31,36 @@ function Feed() {
   const search = Route.useSearch();
   const nav = useNavigate();
   const { stats, review } = useStats();
-  const deck = useMemo(() => {
+  const base = useMemo(() => {
     if (search.ra !== undefined && search.dec !== undefined) { const t = targetForCoords(search.ra, search.dec); return [t, ...TARGETS.filter((x) => x.id !== t.id)]; }
     return TARGETS;
   }, [search.ra, search.dec]);
+  const [deck, setDeck] = useState<Target[]>(base);
+  const [endless, setEndless] = useState(false);
+  useEffect(() => { setDeck(base); setIdx(0); }, [base]);
   const [idx, setIdx] = useState(0);
   const [opts, setOpts] = useState<ViewOpts>({ diff: false, gaia: false, band: "composite", fov: search.fov ?? 1, speed: 1 });
   const [classify, setClassify] = useState(false);
   const [q, setQ] = useState("");
   const [drag, setDrag] = useState({ x: 0, y: 0, active: false });
   const start = useRef({ x: 0, y: 0 });
-  const t = deck[idx % deck.length]!;
+  const t = deck[Math.min(idx, deck.length - 1)]!;
 
-  const next = () => { setIdx((i) => i + 1); setDrag({ x: 0, y: 0, active: false }); };
-  const pass = () => { review(); toast("Static sky logged", { description: t.name }); next(); };
+  const next = () => {
+    setDeck((d) => (idx + 2 >= d.length ? [...d, randomPatch(), randomPatch(), randomPatch()] : d));
+    setIdx((i) => i + 1); setDrag({ x: 0, y: 0, active: false });
+  };
+  const pass = () => { review(); void recordSwipe(t, "static"); toast("Static sky logged", { description: t.name }); next(); };
+  const skip = () => { void recordSwipe(t, "skipped"); next(); };
+  const randomNow = () => { const rp = randomPatch(); setDeck((d) => [...d.slice(0, idx + 1), rp, ...d.slice(idx + 1)]); setIdx((i) => i + 1); };
+  const toggleEndless = () => {
+    if (endless) { setEndless(false); setDeck(base); setIdx(0); return; }
+    setEndless(true); setDeck(Array.from({ length: 5 }, () => randomPatch())); setIdx(0);
+    toast("Endless Survey Mode", { description: "Random patches from across the whole sky." });
+  };
   const inspect = () => nav({ to: "/inspect", search: { ra: t.ra, dec: t.dec, fov: opts.fov } });
   const flag = (cls: Classification) => {
+    void recordSwipe(t, "candidate", cls);
     review({ id: `${t.id}-${Date.now()}`, targetId: t.id, name: t.name, ra: t.ra, dec: t.dec, cls, at: Date.now() });
     setClassify(false); toast.success("Added to your Discovery Log", { description: `${cls} · ${t.name}` }); next();
   };
@@ -62,6 +77,10 @@ function Feed() {
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Barnard's Star · 133.795 -7.245 · 08h55m10.8s -07d14m42.5s" className="h-10 w-full rounded-full border border-border bg-card pl-9 pr-3 font-mono text-xs outline-none focus:border-primary" /></div>
         <button className="rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground">Go</button>
       </form>
+      <div className="mb-3 flex flex-wrap gap-2">
+        <button onClick={randomNow} className="inline-flex items-center gap-1.5 rounded-full border border-primary/60 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary"><Shuffle className="h-3.5 w-3.5" />Generate random sky patch</button>
+        <button onClick={toggleEndless} aria-pressed={endless} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold ${endless ? "border-accent bg-accent/15 text-accent" : "border-border text-muted-foreground"}`}><InfinityIcon className="h-3.5 w-3.5" />Endless Survey Mode{endless ? " · on" : ""}</button>
+      </div>
       <div className="no-scrollbar -mx-4 mb-4 flex gap-2 overflow-x-auto px-4">
         <span className="flex shrink-0 items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-accent"><Sparkles className="h-3 w-3" />NASA targets</span>
         {TARGETS.filter((x) => x.benchmark).map((x) => (
@@ -105,6 +124,7 @@ function Feed() {
             <button aria-label="Flag anomaly" onClick={() => setClassify(true)} className="grid h-16 w-16 place-items-center rounded-full border-2 border-success text-success transition active:scale-90"><Globe className="h-8 w-8" /></button>
           </div>
           <p className="mt-2 text-center text-[11px] text-muted-foreground">← static · ↑ inspect · flag moving object →</p>
+          <div className="mt-1 text-center"><button onClick={skip} className="inline-flex items-center gap-1 text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"><SkipForward className="h-3 w-3" />Not sure — skip</button></div>
         </div>
         <aside className="hidden space-y-4 lg:block">
           <div className="rounded-2xl border border-border bg-card p-5">
