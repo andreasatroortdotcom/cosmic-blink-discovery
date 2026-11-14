@@ -50,7 +50,7 @@ function Profile() {
   const rank = rankFor({ ...stats, reviewed });
   const st = streak(days, new Date().toISOString().slice(0, 10));
   const unlocked = [...new Set([...unlockedIds(ctx), ...(acct.data?.badges ?? [])])];
-  const link = user && typeof window !== "undefined" ? `${window.location.origin}/u/${user.id}` : "";
+  const link = user && typeof window !== "undefined" ? `https://astroswipe.select/u/${user.id}` : "";
   return (
     <Shell>
       <h1 className="mb-3 font-display text-2xl font-bold">Researcher Passport</h1>
@@ -75,7 +75,7 @@ function Profile() {
             : <button onClick={() => void signInWithGoogle()} className="inline-flex items-center gap-2 rounded-full border border-primary px-4 py-2 text-sm font-semibold text-primary"><Link2 className="h-4 w-4" />Sign in to share your profile</button>}
           <ShareImageDialog label="Export profile card" className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
             render={() => renderPassport({ callsign, rank, reviewed, flagged, streak: st, badges: unlocked })}
-            filename={`astroswipe-passport-${callsign}.png`} title="Researcher passport" shareText={`${callsign} — ${rank} on Astroswipe, hunting Planet X in SPHEREx data.`} shareUrl={link || "https://cosmic-blink-discovery.lovable.app/"} />
+            filename={`astroswipe-passport-${callsign}.png`} title="Researcher passport" shareText={`${callsign} — ${rank} on Astroswipe, hunting Planet X in SPHEREx data.`} shareUrl={link || "https://astroswipe.select/"} />
         </div>
       </section>
       <h2 className="mb-3 font-display text-lg font-semibold">Badges <span className="font-mono text-sm text-muted-foreground">{unlocked.length}/{BADGES.length}</span></h2>

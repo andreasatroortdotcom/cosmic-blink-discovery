@@ -45,7 +45,7 @@ function PublicProfilePage() {
             <div className="mt-4 flex flex-wrap gap-2">
               <ShareImageDialog label="Passport card" className="inline-flex items-center gap-2 rounded-full border border-accent px-4 py-2 text-sm font-semibold text-accent"
                 render={() => renderPassport({ callsign: p.display_name, rank, reviewed: p.reviewed, flagged: p.flagged, streak: st, badges })}
-                filename={`astroswipe-passport-${p.display_name}.png`} title="Researcher passport" shareText={`${p.display_name} — ${rank} on Astroswipe`} shareUrl={typeof window !== "undefined" ? window.location.href : undefined} />
+                filename={`astroswipe-passport-${p.display_name}.png`} title="Researcher passport" shareText={`${p.display_name} — ${rank} on Astroswipe`} shareUrl={`https://astroswipe.select/u/${id}`} />
               <Link to="/" search={{}} className="inline-flex items-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Join the hunt</Link>
             </div>
           </section>

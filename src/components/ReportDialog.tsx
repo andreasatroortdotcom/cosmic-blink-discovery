@@ -14,7 +14,7 @@ export function ReportDialog({ input, open: openProp, onOpenChange, hideTrigger 
   const [openState, setOpenState] = useState(false);
   const open = openProp ?? openState;
   const setOpen = (o: boolean) => { setOpenState(o); onOpenChange?.(o); };
-  const r = useMemo(() => (open ? buildReport({ ...input, origin: window.location.origin }) : null), [open, input]);
+  const r = useMemo(() => (open ? buildReport({ ...input, origin: "https://astroswipe.select" }) : null), [open, input]);
   const md = r ? reportToMarkdown(r) : "";
   const base = `astroswipe-${input.patchId}`;
   const btn = "inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold hover:border-primary hover:text-primary";
