@@ -30,7 +30,7 @@ function Inspect() {
   const t = useMemo(() => targetForCoords(ra, dec), [ra, dec]);
   const sed = useMemo(() => spectrum(t), [t]);
   const [opts, setOpts] = useState<ViewOpts>({ diff: false, gaia: true, band: "composite", fov: fov ?? 1, speed: 1 });
-  const url = typeof window === "undefined" ? "" : `${window.location.origin}/inspect?ra=${ra}&dec=${dec}&fov=${opts.fov}`;
+  const url = `https://astroswipe.select/inspect?ra=${ra}&dec=${dec}&fov=${opts.fov}`;
   const main = buildField(t).find((s) => s.anomaly || s.var || Math.abs(s.vx) > 0.01);
   const pm = main ? (Math.hypot(main.vx, main.vy) * 6 * 60 * 2).toFixed(2) : "0";
   const muted = useMuted();
