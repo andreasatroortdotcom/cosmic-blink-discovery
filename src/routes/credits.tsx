@@ -20,14 +20,14 @@ function Credits() {
       <header className="mb-8 max-w-2xl">
         <p className="mb-2 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-accent"><Code2 className="h-4 w-4" />Development acknowledgements</p>
         <h1 className="font-display text-3xl font-bold">Build Credits</h1>
-        <p className="mt-4 text-lg leading-relaxed text-foreground">I used <strong className="text-primary">Lovable</strong>, a <strong className="text-accent">Super Intelligence (SI)</strong> tool, to generate code for Astroswipe’s user interface and parts of its backend, and for security: periodic security scans and continuous monitoring.</p>
+        <p className="mt-4 text-lg leading-relaxed text-foreground">I used <a href="https://lovable.dev/?partner_ref=EACTYN60" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2"><strong className="text-primary">Lovable</strong></a>, a <strong className="text-accent">Super Intelligence (SI)</strong> tool, to generate code for Astroswipe’s user interface and parts of its backend, and for security: periodic security scans and continuous monitoring.</p>
         <p className="mt-3 text-sm text-muted-foreground">— Andreas</p>
       </header>
 
       <section aria-labelledby="tools-heading" className="border-t border-border py-6">
         <h2 id="tools-heading" className="mb-4 flex items-center gap-2 font-display text-xl font-semibold"><Sparkles className="h-5 w-5 text-primary" />Super Intelligence (SI) disclosure</h2>
-        <h3 className="font-display text-xl font-semibold text-primary">Lovable</h3>
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">Lovable was the SI-assisted development tool used for code generation. Its contributions include the user interface and portions of the backend implementation. I also use Lovable for security, both periodic security sweeps and continuous monitoring of the app.</p>
+        <h3 className="font-display text-xl font-semibold text-primary"><a href="https://lovable.dev/?partner_ref=EACTYN60" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">Lovable</a></h3>
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground"><a href="https://lovable.dev/?partner_ref=EACTYN60" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">Lovable</a> was the SI-assisted development tool used for code generation. Its contributions include the user interface and portions of the backend implementation. I also use Lovable for security, both periodic security sweeps and continuous monitoring of the app.</p>
       </section>
 
       <section aria-labelledby="scope-heading" className="border-t border-border py-6">
