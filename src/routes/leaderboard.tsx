@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Trophy, LogOut } from "lucide-react";
+import { Trophy } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { GoogleButton } from "@/components/AuthButton";
 import { supabase } from "@/integrations/supabase/client";
-import { useUser, signOut } from "@/lib/auth";
+import { useUser } from "@/lib/auth";
+import { SignOutButton } from "@/components/SignOutButton";
 import { POINTS, VERIFY_VOTES_NEEDED, titleFor, nextTitle } from "@/lib/points";
 
 export const Route = createFileRoute("/leaderboard")({
@@ -43,7 +44,7 @@ function Board() {
               {[["Reviews", me?.reviews], ["Verified", me?.verifications], ["First flags", me?.first_flags], ["Confirmed", me?.confirmed]].map(([k, v]) => <div key={k as string} className="rounded-lg bg-secondary p-2"><div className="text-base text-foreground">{v ?? 0}</div><div className="text-muted-foreground">{k}</div></div>)}
             </div>
             {up && <p className="text-xs text-muted-foreground">{up.at - pts} points to <b className="text-foreground">{up.name}</b></p>}
-            <button onClick={() => void signOut()} className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"><LogOut className="h-3 w-3" />Sign out</button>
+            <SignOutButton className="text-muted-foreground" />
           </div>
         )}
       </section>
