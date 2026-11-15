@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CommunityRouteImport } from './routes/community'
+import { Route as CreditsRouteImport } from './routes/credits'
 import { Route as InspectRouteImport } from './routes/inspect'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as LogRouteImport } from './routes/log'
@@ -27,6 +28,11 @@ const IndexRoute = IndexRouteImport.update({
 const CommunityRoute = CommunityRouteImport.update({
   id: '/community',
   path: '/community',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreditsRoute = CreditsRouteImport.update({
+  id: '/credits',
+  path: '/credits',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InspectRoute = InspectRouteImport.update({
@@ -68,6 +74,7 @@ const UIdRoute = UIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/community': typeof CommunityRoute
+  '/credits': typeof CreditsRoute
   '/inspect': typeof InspectRoute
   '/leaderboard': typeof LeaderboardRoute
   '/log': typeof LogRoute
@@ -79,6 +86,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/community': typeof CommunityRoute
+  '/credits': typeof CreditsRoute
   '/inspect': typeof InspectRoute
   '/leaderboard': typeof LeaderboardRoute
   '/log': typeof LogRoute
@@ -91,6 +99,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/community': typeof CommunityRoute
+  '/credits': typeof CreditsRoute
   '/inspect': typeof InspectRoute
   '/leaderboard': typeof LeaderboardRoute
   '/log': typeof LogRoute
@@ -104,6 +113,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/community'
+    | '/credits'
     | '/inspect'
     | '/leaderboard'
     | '/log'
@@ -115,6 +125,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/community'
+    | '/credits'
     | '/inspect'
     | '/leaderboard'
     | '/log'
@@ -126,6 +137,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/community'
+    | '/credits'
     | '/inspect'
     | '/leaderboard'
     | '/log'
@@ -138,6 +150,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CommunityRoute: typeof CommunityRoute
+  CreditsRoute: typeof CreditsRoute
   InspectRoute: typeof InspectRoute
   LeaderboardRoute: typeof LeaderboardRoute
   LogRoute: typeof LogRoute
@@ -161,6 +174,13 @@ declare module '@tanstack/react-router' {
       path: '/community'
       fullPath: '/community'
       preLoaderRoute: typeof CommunityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/credits': {
+      id: '/credits'
+      path: '/credits'
+      fullPath: '/credits'
+      preLoaderRoute: typeof CreditsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/inspect': {
@@ -218,6 +238,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CommunityRoute: CommunityRoute,
+  CreditsRoute: CreditsRoute,
   InspectRoute: InspectRoute,
   LeaderboardRoute: LeaderboardRoute,
   LogRoute: LogRoute,
