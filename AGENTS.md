@@ -36,3 +36,4 @@ use the editor.
 - Badge unlocks are stored per account (user_badges) and public profiles at /u/$id read through the public_profile RPC; profiles/swipes stay own-row only so no raw rows leak.
 - Candidate evidence summaries use a public server function reading aggregate views only; AI Gateway helpers stay server-only, and each export requires a fresh researcher confirmation tied to the generated summary. Simulation provenance is included in every export so synthetic sky models never become observational claims.
 - All logout controls share SignOutButton and signOut(queryClient): cancel queries, clear cached account data, end the session, then replace navigation to the public feed to avoid stale account state.
+- Development acknowledgements have a dedicated public /credits route; the bottom navigation uses equal-width grid columns to keep all tabs visible on phones.
