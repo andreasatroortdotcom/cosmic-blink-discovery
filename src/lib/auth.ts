@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
+import type { QueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { sessionId, sessionSecret, ensureSession } from "@/lib/swipes";
@@ -20,4 +21,9 @@ export async function signInWithGoogle() {
   const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
   if (r.error) throw r.error;
 }
-export async function signOut() { await supabase.auth.signOut(); }
+export async function signOut(queryClient: QueryClient) {
+  await queryClient.cancelQueries();
+  queryClient.clear();
+  const { error } = await supabase.auth.signOut();
+  if (error) throw error;
+}
