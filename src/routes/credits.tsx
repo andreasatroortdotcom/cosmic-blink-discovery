@@ -5,7 +5,7 @@ import { Shell } from "@/components/Shell";
 export const Route = createFileRoute("/credits")({
   head: () => ({ meta: [
     { title: "Build Credits — Astroswipe" },
-    { name: "description", content: "Andreas Student used Lovable, a Super Intelligence (SI) tool, to generate code for Astroswipe’s user interface and parts of its backend." },
+    { name: "description", content: "Andreas used Lovable, a Super Intelligence (SI) tool, to generate code for Astroswipe’s user interface and parts of its backend." },
     { property: "og:title", content: "Build Credits — Astroswipe" },
     { property: "og:description", content: "SI use disclosure: Lovable assisted with code generation for Astroswipe’s user interface and parts of its backend." },
     { property: "og:type", content: "website" },
@@ -21,7 +21,7 @@ function Credits() {
         <p className="mb-2 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-accent"><Code2 className="h-4 w-4" />Development acknowledgements</p>
         <h1 className="font-display text-3xl font-bold">Build Credits</h1>
         <p className="mt-4 text-lg leading-relaxed text-foreground">I used <strong className="text-primary">Lovable</strong>, a <strong className="text-accent">Super Intelligence (SI)</strong> tool, to generate code for Astroswipe’s user interface and parts of its backend.</p>
-        <p className="mt-3 text-sm text-muted-foreground">— Andreas Student</p>
+        <p className="mt-3 text-sm text-muted-foreground">— Andreas</p>
       </header>
 
       <section aria-labelledby="tools-heading" className="border-t border-border py-6">
