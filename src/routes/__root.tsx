@@ -85,6 +85,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Astroswipe — SPHEREx citizen science" },
       { name: "description", content: "Swipe through SPHEREx sky epochs to discover moving objects and Planet X candidates." },
       { name: "author", content: "Lovable" },
+      { name: "generator", content: "Lovable — Super Intelligence (SI)-assisted development" },
+      { name: "si-disclosure", content: "Andreas Student used Lovable, a Super Intelligence (SI) tool, to generate code for Astroswipe’s user interface and parts of its backend." },
       { property: "og:title", content: "Astroswipe — SPHEREx citizen science sky hunt" },
       { property: "og:description", content: "Swipe through SPHEREx sky epochs to discover moving objects and Planet X candidates." },
       { property: "og:type", content: "website" },
